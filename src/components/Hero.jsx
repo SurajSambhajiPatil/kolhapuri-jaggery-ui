@@ -51,7 +51,7 @@ export default function Hero() {
         <div className="hidden md:flex justify-center">
           <div className="relative bg-white/90 rounded-2xl shadow-xl p-6">
             <img
-              src="/images/hero/FinalLogo1.png"
+              src="/images/hero/GUDORA-FinalLogoV1.png"
               alt="Kolhapuri Jaggery"
               className="max-w-[220px]"
             />

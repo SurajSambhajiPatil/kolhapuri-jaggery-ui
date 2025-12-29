@@ -42,14 +42,24 @@ export default function ProductCard({ product }) {
             ₹{product.price}
           </span>
 
-          <button className="
+          <button
+            className="
             bg-leaf text-white
             px-4 py-2
             rounded-lg
             text-sm
             hover:bg-green-700
             transition
-          ">
+          "
+            onClick={() => {
+              // lazy import to avoid circular issues
+              import("../lib/cart").then((c) => {
+                c.addToCart({ id: product.id, name: product.name, price: product.price, image: product.image, qty: 1 });
+                // open cart modal if available
+                if (window.__showCartModal) window.__showCartModal();
+              });
+            }}
+          >
             Add to Cart
           </button>
         </div>

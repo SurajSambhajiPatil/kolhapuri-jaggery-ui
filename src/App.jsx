@@ -1,4 +1,4 @@
-// import Navbar from "./components/Navbar";
+import Navbar from "./components/Navbar";
 // import Hero from "./components/Hero";
 // import Reviews from "./components/Reviews";
 // import Footer from "./components/Footer";
@@ -7,6 +7,9 @@
 // import BecomeSeller from "./components/BecomeSeller";
 // import ProcessSection from "./components/ProcessSection";
 
+import { useEffect, useState } from "react";
+import LoginModal from "./components/LoginModal";
+import CartModal from "./components/CartModal";
 // export default function App() {
 //   return (
 //     <div className="min-h-screen text-gray-800">
@@ -268,7 +271,6 @@
 //   );
 // }
 
-import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import Reviews from "./components/Reviews";
 import Footer from "./components/Footer";
@@ -277,12 +279,49 @@ import products from "./data/products";
 import BecomeSeller from "./components/BecomeSeller";
 import ProcessSection from "./components/ProcessSection";
 import GetHealthTips from "./components/GetHealthTips";
+import Category from "./pages/Category";
 
 
 export default function App() {
+  const [showLogin, setShowLogin] = useState(false);
+  const [showCart, setShowCart] = useState(false);
+
+  useEffect(() => {
+    // expose a simple global opener used by Navbar (non-invasive)
+    window.__showLoginModal = () => setShowLogin(true);
+    window.__showCartModal = () => setShowCart(true);
+    return () => {
+      try {
+        delete window.__showLoginModal;
+        delete window.__showCartModal;
+      } catch {}
+    };
+  }, []);
+
+  // simple page routing: show Category page for /category/<slug>
+  const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+  if (pathname.startsWith("/category/")) {
+    const slug = pathname.replace('/category/', '').split('/')[0];
+    return (
+      <div className="min-h-screen text-gray-800">
+        <Navbar />
+
+        <LoginModal visible={showLogin} onClose={() => setShowLogin(false)} />
+        <CartModal visible={showCart} onClose={() => setShowCart(false)} />
+
+        <Category slug={slug} />
+
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen text-gray-800">
       <Navbar />
+
+      <LoginModal visible={showLogin} onClose={() => setShowLogin(false)} />
+      <CartModal visible={showCart} onClose={() => setShowCart(false)} />
 
       <main>
         {/* HERO */}
