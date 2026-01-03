@@ -10,6 +10,7 @@ import Navbar from "./components/Navbar";
 import { useEffect, useState } from "react";
 import LoginModal from "./components/LoginModal";
 import CartModal from "./components/CartModal";
+import SellerModal from "./components/SellerModal";
 // export default function App() {
 //   return (
 //     <div className="min-h-screen text-gray-800">
@@ -290,13 +291,17 @@ export default function App() {
     // expose a simple global opener used by Navbar (non-invasive)
     window.__showLoginModal = () => setShowLogin(true);
     window.__showCartModal = () => setShowCart(true);
+    window.__showSellerModal = () => setShowSeller(true);
     return () => {
       try {
         delete window.__showLoginModal;
         delete window.__showCartModal;
+        delete window.__showSellerModal;
       } catch {}
     };
   }, []);
+
+  const [showSeller, setShowSeller] = useState(false);
 
   // simple page routing: show Category page for /category/<slug>
   const pathname = typeof window !== "undefined" ? window.location.pathname : "";
@@ -322,6 +327,7 @@ export default function App() {
 
       <LoginModal visible={showLogin} onClose={() => setShowLogin(false)} />
       <CartModal visible={showCart} onClose={() => setShowCart(false)} />
+      <SellerModal visible={showSeller} onClose={() => setShowSeller(false)} />
 
       <main>
         {/* HERO */}

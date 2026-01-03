@@ -1,4 +1,9 @@
 export default function Hero() {
+  const scrollToId = (id) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <section id="home"
       className="
@@ -37,11 +42,23 @@ export default function Hero() {
           </p>
 
           <div className="mt-10 flex gap-4 flex-wrap items-center">
-            <button className="bg-leaf hover:bg-green-700 text-white px-9 py-4 rounded-xl text-lg font-semibold shadow-lg">
+            <button
+              className="bg-leaf hover:bg-green-700 text-white px-9 py-4 rounded-xl text-lg font-semibold shadow-lg"
+              onClick={() => scrollToId('products')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && scrollToId('products')}
+            >
               Shop Now
             </button>
 
-            <button className="border-2 border-white/80 text-white px-9 py-4 rounded-xl text-lg bg-black/20 hover:bg-white hover:text-black transition">
+            <button
+              className="border-2 border-white/80 text-white px-9 py-4 rounded-xl text-lg bg-black/20 hover:bg-white hover:text-black transition"
+              onClick={() => scrollToId('process')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && scrollToId('process')}
+            >
               Watch Process
             </button>
           </div>
@@ -51,7 +68,7 @@ export default function Hero() {
         <div className="hidden md:flex justify-center">
           <div className="relative bg-white/90 rounded-2xl shadow-xl p-6">
             <img
-              src="/images/hero/GUDORA-FinalLogoV1.png"
+              src="/images/hero/GudoraFoods-FinalLogo.png"
               alt="Kolhapuri Jaggery"
               className="max-w-[220px]"
             />

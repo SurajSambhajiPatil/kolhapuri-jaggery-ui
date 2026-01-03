@@ -8,7 +8,7 @@ export default function Footer() {
           {/* BRAND */}
           <div>
             <h3 className="text-2xl font-bold text-white mb-3">
-              KolhapuriJaggery
+              GUDORAFOODS
             </h3>
             <p className="text-sm leading-relaxed text-gray-400">
               Pure organic jaggery crafted in Kolhapur using
@@ -49,7 +49,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <span>🌐</span>
-                <span>www.kolhapurijaggery.com</span>
+                <span>www.gudorafoods.com</span>
               </li>
             </ul>
           </div>
@@ -58,7 +58,7 @@ export default function Footer() {
         {/* DIVIDER */}
         <div className="border-t border-white/10 mt-12 pt-6 text-center">
           <p className="text-xs text-gray-400">
-            © 2025 KolhapuriJaggery. All rights reserved.
+            © 2025 GUDORAFOODS. All rights reserved.
           </p>
         </div>
       </div>

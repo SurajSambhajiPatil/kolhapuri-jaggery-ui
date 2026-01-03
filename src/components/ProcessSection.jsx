@@ -1,3 +1,4 @@
+import { data } from "autoprefixer";
 import { useState } from "react";
 
 export default function ProcessSection() {
@@ -78,7 +79,7 @@ export default function ProcessSection() {
 
           <div className="inline-flex items-center gap-3 bg-white/95 text-gray-900 px-5 py-3 rounded-xl shadow-lg mt-6">
             <img
-              src="/images/hero/FinalLogo.png"
+              src="/images/hero/GudoraFoods-FinalLogo.png"
               alt="Trusted Kolhapuri Jaggery"
               className="h-9 w-9 object-contain"
             />

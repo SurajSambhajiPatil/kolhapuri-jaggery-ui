@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import ReviewModal from "./ReviewModal";
+import productsList from "../data/products";
 
 const reviews = [
   { text: "Pure and authentic jaggery.", name: "Amit", location: "Kolhapur" },
@@ -16,6 +18,8 @@ const reviews = [
 export default function Reviews() {
   const sliderRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [items, setItems] = useState(reviews);
 
   const CARD_SCROLL = 380;
 
@@ -49,17 +53,21 @@ export default function Reviews() {
     return () => clearInterval(interval);
   }, [isHovered]);
 
+  const handleNewReview = (r) => {
+    // add to items at start
+    setItems(prev => [{ text: r.text, name: r.name, product: r.product, rating: r.rating }, ...prev]);
+    // optionally show a toast — simulated
+  };
+
   return (
     <section className="py-12 bg-white">
       <div className="relative max-w-7xl mx-auto px-6">
 
         {/* Heading */}
-        <h2 className="text-3xl font-bold text-center mb-2">
-          What Our Customers Say
-        </h2>
-        <p className="text-center text-gray-600 mb-6">
-          Real experiences from families who trust Kolhapuri Jaggery
-        </p>
+        <div className="mb-2">
+          <h2 className="text-3xl font-bold">What Our Customers Say</h2>
+          <p className="text-sm text-gray-600">Real experiences from families who trust Kolhapuri Jaggery</p>
+        </div>
 
         {/* Left Arrow */}
         <button
@@ -95,7 +103,7 @@ export default function Reviews() {
             scrollbar-hide
           "
         >
-          {reviews.map((r, i) => (
+          {items.map((r, i) => (
             <div
               key={i}
               className="
@@ -112,14 +120,12 @@ export default function Reviews() {
                 transition
               "
             >
-              <div className="text-yellow-400 mb-3">★★★★★</div>
+              <div className="text-yellow-400 mb-3">{'★'.repeat(r.rating || 5)}</div>
 
-              <p className="text-gray-800 mb-4 leading-relaxed">
-                “{r.text}”
-              </p>
+              <p className="text-gray-800 mb-4 leading-relaxed">“{r.text}”</p>
 
               <div className="font-semibold text-gray-900">{r.name}</div>
-              <div className="text-sm text-gray-600">{r.location}</div>
+              <div className="text-sm text-gray-600">{r.product || r.location}</div>
             </div>
           ))}
         </div>
@@ -128,10 +134,14 @@ export default function Reviews() {
         <div className="pointer-events-none absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-white to-transparent" />
 
         {/* Mobile hint */}
-        <p className="md:hidden text-center text-sm text-gray-500 mt-4">
-          ← Swipe to see more →
-        </p>
+        <p className="md:hidden text-center text-sm text-gray-500 mt-4">← Swipe to see more →</p>
+
+        {/* Add review button centered at bottom */}
+        <div className="w-full flex justify-center mt-6">
+          <button onClick={() => setShowReviewModal(true)} className="bg-green-600 text-white px-5 py-3 rounded-full shadow">Add Review</button>
+        </div>
       </div>
+      <ReviewModal visible={showReviewModal} onClose={() => setShowReviewModal(false)} onSubmit={handleNewReview} />
     </section>
   );
 }

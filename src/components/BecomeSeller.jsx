@@ -46,6 +46,7 @@ export default function BecomeSeller() {
             type="button"
             aria-label="Apply to become a seller"
             className="bg-white text-green-700 font-semibold px-7 py-3 rounded-xl shadow-lg hover:scale-105 transition"
+            onClick={() => (window.__showSellerModal ? window.__showSellerModal() : (window.location.href = '/become-seller'))}
           >
             Start Selling with Us
           </button>
