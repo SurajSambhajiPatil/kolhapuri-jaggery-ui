@@ -1,44 +1,51 @@
 export default function GetHealthTips() {
   return (
-    <section className="relative py-20 bg-white">
-      {/* subtle background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-green-50 to-white" />
+    <section className="relative py-14 bg-[#FBF7F2]">
+      {/* soft separator from above section */}
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#5A3214]/15 to-transparent" />
+
+      {/* subtle ambient glow */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[500px] h-[220px] bg-green-200/30 blur-[120px]" />
+      </div>
 
       <div className="relative z-10 max-w-5xl mx-auto px-6">
-        <div className="
-          bg-white
-          rounded-3xl
-          shadow-xl
-          border border-black/5
-          p-10 md:p-14
-          text-center
-        ">
+        <div
+          className="
+            bg-white
+            rounded-3xl
+            shadow-lg
+            border border-black/5
+            px-8 py-10 md:px-12
+            text-center
+          "
+        >
           {/* Heading */}
-          <h3 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">
+          <h3 className="text-2xl md:text-3xl font-bold text-[#2A1A0A] mb-3">
             Get Health Tips & Offers
           </h3>
 
-          <p className="text-gray-600 max-w-2xl mx-auto mb-8 text-lg">
-            Weekly health tips, jaggery benefits, recipes, and exclusive
-            KolhapuriJaggery offers — straight to your inbox.
+          <p className="text-gray-600 max-w-2xl mx-auto mb-6 text-base">
+            Jaggery health benefits, traditional recipes, and exclusive Gudora
+            offers — delivered occasionally, never spam.
           </p>
 
           {/* Input */}
           <form
             onSubmit={(e) => e.preventDefault()}
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+            className="flex flex-col sm:flex-row gap-3 justify-center items-center"
           >
             <input
               type="email"
               required
               placeholder="Enter your email address"
               className="
-                w-full sm:w-96
-                px-5 py-4
+                w-full sm:w-80
+                px-5 py-3.5
                 rounded-xl
                 border border-gray-300
                 focus:outline-none
-                focus:ring-2 focus:ring-green-500
+                focus:ring-2 focus:ring-green-600
                 text-gray-800
               "
             />
@@ -46,13 +53,13 @@ export default function GetHealthTips() {
             <button
               type="submit"
               className="
-                bg-leaf
-                hover:bg-green-700
+                bg-green-700
+                hover:bg-green-800
                 text-white
-                px-8 py-4
+                px-7 py-3.5
                 rounded-xl
                 font-semibold
-                shadow-lg
+                shadow
                 transition
                 whitespace-nowrap
               "
@@ -62,8 +69,8 @@ export default function GetHealthTips() {
           </form>
 
           {/* Trust note */}
-          <p className="mt-6 text-sm text-gray-500">
-            No spam. Unsubscribe anytime. 100% natural goodness 🌿
+          <p className="mt-4 text-xs text-gray-500">
+            No spam • Unsubscribe anytime • 100% natural goodness 🌿
           </p>
         </div>
       </div>

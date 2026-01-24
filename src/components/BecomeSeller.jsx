@@ -1,62 +1,64 @@
-export default function BecomeSeller() {
-  return (
-    <section className="relative py-14 md:py-16 text-white overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-green-700 via-green-600 to-green-800 opacity-95" />
+import { useState } from "react";
+import SellerModal from "./SellerModal";
 
-      <div className="relative z-10 max-w-6xl mx-auto px-6">
-        <div className="rounded-3xl bg-white/10 backdrop-blur-lg border border-white/20 shadow-2xl p-8 md:p-10 text-center">
-          
-          {/* Heading */}
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-4">
+export default function BecomeSeller() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  return (
+    <>
+      {/* ================= BECOME SELLER SECTION ================= */}
+      <div className="max-w-7xl mx-auto px-6 py-20">
+        <div className="bg-green-700 text-white rounded-3xl p-12 shadow-xl text-center">
+          <h2 className="text-4xl font-extrabold mb-4">
             Become a Seller
           </h2>
 
-          {/* Sub text */}
-          <p className="text-base md:text-lg text-green-50 max-w-3xl mx-auto mb-6">
-            Are you a farmer, manufacturer, or distributor?
-            Partner with <span className="font-semibold">KolhapuriJaggery</span> and
-            reach thousands of health-conscious customers across India.
+          <p className="text-lg opacity-90 mb-10">
+            Partner with Gudora Foods and reach health-conscious customers
+            across India.
           </p>
 
-          {/* Key points */}
-          <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8 text-left">
-            <div className="flex gap-3">
-              <span className="text-xl">🌱</span>
-              <p>Fair pricing & transparent partnership</p>
-            </div>
-
-            <div className="flex gap-3">
-              <span className="text-xl">🚚</span>
-              <p>Distribution & logistics support</p>
-            </div>
-
-            <div className="flex gap-3">
-              <span className="text-xl">📈</span>
-              <p>Grow your brand with us</p>
-            </div>
+          {/* STATS */}
+          <div className="flex justify-center gap-10 mb-10 text-sm font-semibold">
+            <span>500+ Farmers</span>
+            <span>3+ Regions</span>
+            <span>100% Transparent</span>
           </div>
 
-          <p className="text-sm text-green-100 mb-6">
-            ✔ Transparent payments &nbsp; • &nbsp; ✔ Dedicated support &nbsp; • &nbsp; ✔ Pan-India reach
-          </p>
+          {/* ACTION BUTTONS */}
+          <div className="flex justify-center gap-6">
+            {/* WhatsApp */}
+            <a
+              href="https://wa.me/91XXXXXXXXXX"
+              target="_blank"
+              rel="noreferrer"
+              className="bg-white text-green-700 font-bold px-8 py-3 rounded-full"
+            >
+              Start via WhatsApp
+            </a>
 
-          {/* CTA */}
-          <button
-            type="button"
-            aria-label="Apply to become a seller"
-            className="bg-white text-green-700 font-semibold px-7 py-3 rounded-xl shadow-lg hover:scale-105 transition"
-            onClick={() => (window.__showSellerModal ? window.__showSellerModal() : (window.location.href = '/become-seller'))}
-          >
-            Start Selling with Us
-          </button>
-
-          <p className="mt-4 text-xs text-green-100">
-            Trusted by farmers & distributors across Maharashtra
-          </p>
-
+            {/* APPLY VIA FORM */}
+            <button
+              onClick={() => {
+                console.log("Apply via Form clicked");
+                setIsModalOpen(true);
+              }}
+              className="border-2 border-white px-8 py-3 rounded-full font-bold hover:bg-white hover:text-green-700 transition"
+            >
+              Apply via Form
+            </button>
+          </div>
         </div>
       </div>
-    </section>
+
+      {/* ================= SELLER MODAL ================= */}
+      <SellerModal
+        visible={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={(data) => {
+          console.log("Seller application submitted:", data);
+        }}
+      />
+    </>
   );
 }
