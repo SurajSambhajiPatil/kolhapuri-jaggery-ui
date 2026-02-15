@@ -102,42 +102,18 @@ export default function LoginModal({ visible, onClose }) {
         </button>
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="relative hidden md:block">
-            <div className="absolute inset-0 bg-gradient-to-b from-amber-300 via-amber-200 to-yellow-100" />
             <img
               src="/images/hero/Gudora-Food-BG.png"
-              alt=""
-              className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-70"
+              alt="Gudora Foods"
+              className="w-full h-full object-cover"
             />
-            <div className="relative h-full p-10">
-              <div className="pt-2">
-                <h2 className="text-4xl font-extrabold text-amber-900 drop-shadow-sm">GudoraFoods</h2>
-                <p className="mt-2 text-amber-900 font-medium">Pure Jaggery. No Compromise.</p>
-              </div>
-              <div className="absolute inset-x-0 bottom-6 h-44 pointer-events-none">
-                <img
-                  src="/images/products/Jaggery-Blocks.png"
-                  alt="Jaggery Blocks"
-                  className="absolute left-3 bottom-0 h-32 drop-shadow-xl -rotate-1"
-                />
-                <img
-                  src="/images/products/Jaggery-Powder-Bottle.png"
-                  alt="Jaggery Bottle"
-                  className="absolute left-1/2 -translate-x-1/2 bottom-0 h-44 drop-shadow-2xl"
-                />
-                <img
-                  src="/images/products/Jaggery-Powder.png"
-                  alt="Jaggery Powder"
-                  className="absolute right-3 bottom-0 h-36 drop-shadow-xl rotate-1"
-                />
-              </div>
-            </div>
           </div>
           <div className="p-8">
             <div className="flex items-center justify-center mb-6">
               <img
                 src="/images/hero/GudoraFoods-FinalLogo.png"
                 alt="Gudora"
-                className="h-12"
+                className="h-16"
               />
             </div>
             {!showRegister ? (
