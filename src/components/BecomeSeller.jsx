@@ -8,21 +8,21 @@ export default function BecomeSeller() {
     <>
       {/* ================= BECOME SELLER SECTION ================= */}
       <div className="max-w-7xl mx-auto px-6 py-20">
-        <div className="bg-green-700 text-white rounded-3xl p-12 shadow-xl text-center">
-          <h2 className="text-4xl font-extrabold mb-4">
+        <div className="relative bg-gradient-to-br from-green-50 via-emerald-50 to-emerald-100 rounded-3xl p-12 shadow-xl text-center border border-green-200">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-green-900 mb-4">
             Become a Seller
           </h2>
 
-          <p className="text-lg opacity-90 mb-10">
+          <p className="text-base md:text-lg text-gray-700 mb-10">
             Partner with Gudora Foods and reach health-conscious customers
             across India.
           </p>
 
           {/* STATS */}
-          <div className="flex justify-center gap-10 mb-10 text-sm font-semibold">
-            <span>500+ Farmers</span>
-            <span>3+ Regions</span>
-            <span>100% Transparent</span>
+          <div className="flex justify-center gap-3 sm:gap-6 mb-10 text-sm font-semibold flex-wrap">
+            <span className="inline-flex items-center gap-2 bg-white text-green-800 px-4 py-2 rounded-xl border border-green-200">500+ Farmers</span>
+            <span className="inline-flex items-center gap-2 bg-white text-green-800 px-4 py-2 rounded-xl border border-green-200">3+ Regions</span>
+            <span className="inline-flex items-center gap-2 bg-white text-green-800 px-4 py-2 rounded-xl border border-green-200">100% Transparent</span>
           </div>
 
           {/* ACTION BUTTONS */}
@@ -32,7 +32,7 @@ export default function BecomeSeller() {
               href="https://wa.me/91XXXXXXXXXX"
               target="_blank"
               rel="noreferrer"
-              className="bg-white text-green-700 font-bold px-8 py-3 rounded-full"
+              className="bg-green-700 hover:bg-green-800 text-white font-bold px-8 py-3 rounded-xl shadow-sm"
             >
               Start via WhatsApp
             </a>
@@ -43,7 +43,7 @@ export default function BecomeSeller() {
                 console.log("Apply via Form clicked");
                 setIsModalOpen(true);
               }}
-              className="border-2 border-white px-8 py-3 rounded-full font-bold hover:bg-white hover:text-green-700 transition"
+              className="border-2 border-green-700 text-green-700 px-8 py-3 rounded-xl font-bold hover:bg-green-700 hover:text-white transition shadow-sm"
             >
               Apply via Form
             </button>

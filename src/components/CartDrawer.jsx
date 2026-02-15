@@ -19,7 +19,7 @@ export default function CartDrawer() {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/60 flex justify-end">
+    <div className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm flex justify-end">
       <div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col">
         
         {/* HEADER */}
@@ -69,6 +69,12 @@ export default function CartDrawer() {
                 >
                   +
                 </button>
+                <button
+                  onClick={() => cartApi.removeItem(item.id)}
+                  className="ml-2 text-red-600 text-sm"
+                >
+                  Remove
+                </button>
               </div>
             </div>
           ))}
@@ -76,20 +82,39 @@ export default function CartDrawer() {
 
         {/* FOOTER */}
         <div className="p-5 border-t">
-          <div className="flex justify-between font-bold mb-4">
-            <span>Total</span>
-            <span>₹{cartApi.subtotal()}</span>
+          <div className="bg-green-50 text-green-800 px-4 py-2 rounded-lg mb-4 text-sm">
+            {cartApi.subtotal() > 999 ? "Free shipping applied" : "Add items worth ₹" + (1000 - cartApi.subtotal()) + " for free shipping"}
+          </div>
+          <div className="space-y-2 text-sm mb-4">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>₹{cartApi.subtotal()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Shipping</span>
+              <span>{cartApi.subtotal() > 999 ? "₹0" : "₹80"}</span>
+            </div>
+            <div className="flex justify-between font-bold">
+              <span>Total</span>
+              <span>
+                ₹{cartApi.subtotal() + (cartApi.subtotal() > 999 ? 0 : 80)}
+              </span>
+            </div>
           </div>
 
-          {/* <button className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700">
-            Proceed to Checkout
-          </button> */}
+          <div className="flex gap-3">
+            <button
+              onClick={() => setOpen(false)}
+              className="flex-1 border border-gray-300 rounded-xl px-4 py-3 font-semibold"
+            >
+              Continue Shopping
+            </button>
           <button
   onClick={() => {
     window.location.href = "/checkout";
   }}
   className="
-    w-full
+    flex-1
     bg-green-700
     text-white
     py-3
@@ -102,6 +127,7 @@ export default function CartDrawer() {
 >
   Proceed to Checkout
 </button>
+          </div>
 
         </div>
       </div>

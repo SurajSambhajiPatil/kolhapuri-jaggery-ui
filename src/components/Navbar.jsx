@@ -1,9 +1,12 @@
-import { ChevronDown, ShoppingCart } from "lucide-react";
+import { ChevronDown, ShoppingCart, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getCart } from "../lib/cart";
+import { useAuth } from "../lib/auth";
 
 export default function Navbar({ onLoginClick }) {
   const [cartCount, setCartCount] = useState(0);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, loading, logout } = useAuth();
 
 const goHomeAndScroll = (id) => {
   // Save target section
@@ -47,7 +50,7 @@ const goHomeAndScroll = (id) => {
       </div>
 
       {/* MAIN NAV */}
-      <nav className="bg-white shadow-sm">
+      <nav className="bg-green-50 border-b border-green-200 shadow-sm backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           {/* BRAND */}
           <div
@@ -126,14 +129,36 @@ const goHomeAndScroll = (id) => {
 
           {/* ACTIONS */}
 <div className="flex items-center gap-3">
-  {/* LOGIN */}
   <button
-    onClick={() => onLoginClick && onLoginClick()}
-    className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-semibold
-               hover:border-green-700 hover:text-green-700 transition"
+    className="md:hidden p-2 rounded-lg border border-gray-300"
+    onClick={() => setMobileOpen((v) => !v)}
+    aria-label="Toggle menu"
   >
-    Login
+    {mobileOpen ? <X size={18} /> : <Menu size={18} />}
   </button>
+  {/* AUTH */}
+  {user ? (
+    <>
+      <span className="hidden md:inline text-sm text-gray-700">
+        {user.email}
+      </span>
+      <button
+        onClick={logout}
+        className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-semibold
+                 hover:border-red-600 hover:text-red-600 transition"
+      >
+        Logout
+      </button>
+    </>
+  ) : (
+    <button
+      onClick={() => onLoginClick && onLoginClick()}
+      className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-semibold
+                 hover:border-green-700 hover:text-green-700 transition"
+    >
+      Login
+    </button>
+  )}
 
   {/* ORDERS */}
   <button
@@ -168,6 +193,66 @@ const goHomeAndScroll = (id) => {
 
         </div>
       </nav>
+      {mobileOpen && (
+        <div className="md:hidden bg-green-50 border-t border-green-200 shadow-sm">
+          <ul className="px-6 py-4 space-y-3 text-sm font-medium">
+            <li
+              onClick={() => {
+                setMobileOpen(false);
+                goHomeAndScroll("hero");
+              }}
+              className="cursor-pointer hover:text-green-700"
+            >
+              Home
+            </li>
+            <li
+              onClick={() => {
+                setMobileOpen(false);
+                goHomeAndScroll("products");
+              }}
+              className="cursor-pointer hover:text-green-700"
+            >
+              Products
+            </li>
+            <li
+              onClick={() => {
+                setMobileOpen(false);
+                goHomeAndScroll("why-jaggery");
+              }}
+              className="cursor-pointer hover:text-green-700"
+            >
+              Why Jaggery?
+            </li>
+            <li
+              onClick={() => {
+                setMobileOpen(false);
+                goHomeAndScroll("reviews");
+              }}
+              className="cursor-pointer hover:text-green-700"
+            >
+              Reviews
+            </li>
+            <li
+              onClick={() => {
+                setMobileOpen(false);
+                goHomeAndScroll("become-seller");
+              }}
+              className="cursor-pointer hover:text-green-700"
+            >
+              Become a Seller
+            </li>
+            <li
+              onClick={() => {
+                setMobileOpen(false);
+                window.location.href = "/orders";
+              }}
+              className="cursor-pointer hover:text-green-700"
+            >
+              Orders
+            </li>
+          </ul>
+        </div>
+      )}
 
       <style>{`
         @keyframes marquee {

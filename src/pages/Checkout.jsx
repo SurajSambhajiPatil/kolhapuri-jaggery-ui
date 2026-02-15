@@ -7,6 +7,8 @@ export default function Checkout() {
   const [coupon, setCoupon] = useState("");
   const [discount, setDiscount] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("COD");
+  const [errors, setErrors] = useState({});
+  const couponPresets = ["WELCOME50", "GUDORAYEAR30"];
 
 
   const [form, setForm] = useState({
@@ -16,11 +18,31 @@ export default function Checkout() {
     address: "",
     city: "",
     pincode: "",
+    landmark: "",
+    notes: "",
   });
 
   useEffect(() => {
+    const savedForm = localStorage.getItem("checkoutForm");
+    const savedCoupon = localStorage.getItem("checkoutCoupon");
+    if (savedForm) {
+      try { setForm(JSON.parse(savedForm)); } catch {}
+    }
+    if (savedCoupon) setCoupon(savedCoupon);
+
     setCart(getCart());
+    const sync = () => setCart(getCart());
+    window.addEventListener("cartUpdated", sync);
+    return () => window.removeEventListener("cartUpdated", sync);
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("checkoutForm", JSON.stringify(form));
+  }, [form]);
+
+  useEffect(() => {
+    localStorage.setItem("checkoutCoupon", coupon);
+  }, [coupon]);
 
   const subTotal = subtotal();
   const finalTotal = Math.max(subTotal - discount, 0);
@@ -37,7 +59,27 @@ export default function Checkout() {
 
   const validateForm = () => {
     const { name, mobile, address, city, pincode } = form;
-    return name && mobile && address && city && pincode;
+    const isValid =
+      !!name &&
+      !!mobile &&
+      /^\d{10}$/.test(mobile) &&
+      !!address &&
+      !!city &&
+      !!pincode &&
+      /^\d{6}$/.test(pincode);
+    return isValid;
+  };
+
+  const validateAndSetErrors = () => {
+    const { name, mobile, address, city, pincode } = form;
+    const nextErrors = {};
+    if (!name) nextErrors.name = "Required";
+    if (!mobile || !/^\d{10}$/.test(mobile)) nextErrors.mobile = "Enter valid 10-digit mobile";
+    if (!address) nextErrors.address = "Required";
+    if (!city) nextErrors.city = "Required";
+    if (!pincode || !/^\d{6}$/.test(pincode)) nextErrors.pincode = "Enter valid 6-digit pincode";
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
   const orderData = {
@@ -52,8 +94,7 @@ localStorage.setItem("lastOrder", JSON.stringify(orderData));
 
 
 const placeOrder = () => {
-  if (!validateForm()) {
-    alert("Please fill all delivery details before placing the order.");
+  if (!validateAndSetErrors()) {
     return;
   }
 
@@ -80,8 +121,6 @@ const placeOrder = () => {
     pincode: "",
   });
 
-  alert("Order placed successfully!");
-
   setTimeout(() => {
     window.location.href = "/";
   }, 500);
@@ -101,14 +140,21 @@ const placeOrder = () => {
           </h2>
 
           <div className="grid sm:grid-cols-2 gap-4">
-            <input className="input" placeholder="Full Name"
+            <input className={`input ${errors.name ? "border-red-500" : ""}`} placeholder="Full Name"
               value={form.name}
               onChange={e => setForm({ ...form, name: e.target.value })}
             />
-            <input className="input" placeholder="Mobile Number"
+            <input className={`input ${errors.mobile ? "border-red-500" : ""}`} placeholder="Mobile Number"
               value={form.mobile}
-              onChange={e => setForm({ ...form, mobile: e.target.value })}
+              onChange={e => {
+                const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                setForm({ ...form, mobile: val });
+              }}
             />
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4 mt-1 text-xs text-red-600">
+            <span>{errors.name || ""}</span>
+            <span>{errors.mobile || ""}</span>
           </div>
 
           <input className="input mt-4" placeholder="Email (optional)"
@@ -116,34 +162,54 @@ const placeOrder = () => {
             onChange={e => setForm({ ...form, email: e.target.value })}
           />
 
-          <textarea className="input mt-4 h-24 resize-none"
+          <textarea className={`input mt-4 h-24 resize-none ${errors.address ? "border-red-500" : ""}`}
             placeholder="Full Address"
             value={form.address}
             onChange={e => setForm({ ...form, address: e.target.value })}
           />
+          <div className="text-xs text-red-600 mt-1">{errors.address || ""}</div>
 
           <div className="grid sm:grid-cols-2 gap-4 mt-4">
-            <input className="input" placeholder="City"
+            <input className={`input ${errors.city ? "border-red-500" : ""}`} placeholder="City"
               value={form.city}
               onChange={e => setForm({ ...form, city: e.target.value })}
             />
-            <input className="input" placeholder="Pincode"
+            <input className={`input ${errors.pincode ? "border-red-500" : ""}`} placeholder="Pincode"
               value={form.pincode}
-              onChange={e => setForm({ ...form, pincode: e.target.value })}
+              onChange={e => {
+                const val = e.target.value.replace(/\D/g, "").slice(0, 6);
+                setForm({ ...form, pincode: val });
+              }}
             />
           </div>
+          <div className="grid sm:grid-cols-2 gap-4 mt-1 text-xs text-red-600">
+            <span>{errors.city || ""}</span>
+            <span>{errors.pincode || ""}</span>
+          </div>
+
+          <input className="input mt-4" placeholder="Landmark (optional)"
+            value={form.landmark}
+            onChange={e => setForm({ ...form, landmark: e.target.value })}
+          />
+          <textarea className="input mt-4 h-20 resize-none" placeholder="Delivery notes (optional)"
+            value={form.notes}
+            onChange={e => setForm({ ...form, notes: e.target.value })}
+          />
         </div>
 
         {/* SUMMARY */}
-        <div className="bg-white rounded-2xl shadow-md p-8">
+        <div className="bg-white rounded-2xl shadow-md p-8 md:sticky md:top-20">
           <h2 className="text-2xl font-semibold mb-6">
             Order Summary
           </h2>
 
           {cart.map(item => (
-            <div key={item.id} className="flex justify-between text-sm mb-2">
-              <span>{item.name} × {item.qty}</span>
-              <span>₹{item.price * item.qty}</span>
+            <div key={item.id} className="flex items-center justify-between text-sm mb-3">
+              <div className="flex items-center gap-3">
+                <img src={item.image} alt={item.name} className="h-12 w-12 object-contain bg-gray-50 rounded" />
+                <span className="font-medium">{item.name} × {item.qty}</span>
+              </div>
+              <span className="font-semibold">₹{item.price * item.qty}</span>
             </div>
           ))}
 
@@ -159,6 +225,17 @@ const placeOrder = () => {
             >
               Apply
             </button>
+          </div>
+          <div className="flex gap-2 mb-4">
+            {couponPresets.map((c) => (
+              <button
+                key={c}
+                onClick={() => setCoupon(c)}
+                className="px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-300 hover:border-green-700 hover:text-green-700"
+              >
+                {c}
+              </button>
+            ))}
           </div>
 
           <div className="border-t pt-4 text-sm space-y-2">
@@ -176,25 +253,45 @@ const placeOrder = () => {
             </div>
           </div>
 
-          <div className="mt-6 space-y-2">
-            <label className="flex gap-2">
-              <input type="radio" checked={paymentMethod === "COD"}
-                onChange={() => setPaymentMethod("COD")} />
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <button
+              onClick={() => setPaymentMethod("COD")}
+              className={`px-4 py-3 rounded-xl font-semibold border ${
+                paymentMethod === "COD"
+                  ? "bg-green-700 text-white border-green-700"
+                  : "bg-white text-gray-700 border-gray-300"
+              }`}
+            >
               Cash on Delivery
-            </label>
-            <label className="flex gap-2">
-              <input type="radio" checked={paymentMethod === "ONLINE"}
-                onChange={() => setPaymentMethod("ONLINE")} />
+            </button>
+            <button
+              onClick={() => setPaymentMethod("ONLINE")}
+              className={`px-4 py-3 rounded-xl font-semibold border ${
+                paymentMethod === "ONLINE"
+                  ? "bg-green-700 text-white border-green-700"
+                  : "bg-white text-gray-700 border-gray-300"
+              }`}
+            >
               Online Payment
-            </label>
+            </button>
           </div>
 
           <button
             onClick={placeOrder}
-            className="mt-6 w-full bg-green-700 text-white py-4 rounded-xl font-bold text-lg hover:bg-green-800"
+            disabled={!validateForm()}
+            className={`mt-6 w-full py-4 rounded-xl font-bold text-lg transition ${
+              validateForm()
+                ? "bg-green-700 text-white hover:bg-green-800"
+                : "bg-gray-300 text-gray-600 cursor-not-allowed"
+            }`}
           >
             {paymentMethod === "COD" ? "Place Order" : "Pay & Place Order"}
           </button>
+          <div className="mt-3 flex items-center justify-center gap-4 text-xs text-gray-500">
+            <span>✔ UPI</span>
+            <span>✔ Cards</span>
+            <span>✔ COD</span>
+          </div>
         </div>
       </div>
 

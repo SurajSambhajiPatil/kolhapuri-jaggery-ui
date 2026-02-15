@@ -9,6 +9,9 @@ const products = [
     category: "powder",
     description: "Pure Kolhapuri jaggery powder made from natural sugarcane juice. No chemicals. No preservatives.",
     images: [
+      "/images/uploads/jaggery-powder-1.png",
+      "/images/uploads/jaggery-powder-2.png",
+      "/images/uploads/jaggery-powder-3.png",
       "/images/products/Jaggery-Powder.png",
       "/images/products/Jaggery-Powder-2.png",
       "/images/products/Jaggery-Powder-3.png"

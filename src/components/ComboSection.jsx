@@ -199,18 +199,22 @@ export default function ComboSection() {
   };
 
   return (
-    <section className="py-20 bg-[#EAF2FF] overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-3 gap-10 items-center">
+    <section className="relative py-20 bg-gradient-to-br from-green-50 via-emerald-50 to-emerald-100 overflow-hidden">
+      <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[700px] h-[240px] bg-green-200/30 blur-[120px]" />
+      <div className="absolute -bottom-24 right-10 w-[420px] h-[160px] bg-emerald-200/30 blur-[100px]" />
+      <div className="relative z-10 max-w-7xl mx-auto px-6 grid lg:grid-cols-3 gap-10 items-center">
 
         {/* LEFT CONTENT */}
         <div>
-          <h2 className="text-4xl font-extrabold text-[#1E2A5A] mb-4">
-            Combos
+          <h2 className="text-3xl md:text-4xl font-extrabold text-green-800">
+            Best Value Combos
           </h2>
-          <p className="text-lg text-gray-700 max-w-sm">
-            Save more with our carefully curated jaggery combos for families
-            and daily use.
+          <p className="mt-2 text-sm md:text-base text-gray-700 max-w-sm">
+            Curated packs for families and daily use. Fresh, pure, and great value.
           </p>
+          <div className="mt-4 inline-flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-green-200 text-sm text-green-800">
+            Save more with bundles
+          </div>
         </div>
 
         {/* RIGHT SLIDER */}
@@ -219,18 +223,14 @@ export default function ComboSection() {
           {/* ARROWS */}
           <button
             onClick={() => scroll("left")}
-            className="absolute -left-6 top-1/2 -translate-y-1/2 z-20
-              h-12 w-12 rounded-full bg-white shadow
-              flex items-center justify-center hover:scale-105 transition"
+            className="absolute -left-6 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/80 backdrop-blur border border-green-200 shadow flex items-center justify-center hover:scale-105 transition"
           >
             ←
           </button>
 
           <button
             onClick={() => scroll("right")}
-            className="absolute -right-6 top-1/2 -translate-y-1/2 z-20
-              h-12 w-12 rounded-full bg-white shadow
-              flex items-center justify-center hover:scale-105 transition"
+            className="absolute -right-6 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/80 backdrop-blur border border-green-200 shadow flex items-center justify-center hover:scale-105 transition"
           >
             →
           </button>
@@ -256,7 +256,7 @@ export default function ComboSection() {
                 "
               >
                 {/* DISCOUNT */}
-                <span className="absolute top-4 left-4 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                <span className="absolute top-4 left-4 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
                   {combo.discount}
                 </span>
 
@@ -265,33 +265,34 @@ export default function ComboSection() {
                   ♥
                 </span>
 
-                <img
-                  src={combo.image}
-                  alt={combo.title}
-                  className="h-44 mx-auto object-contain mb-4"
-                />
+                <div className="bg-gray-50 rounded-2xl p-4 mb-4 flex items-center justify-center">
+                  <img
+                    src={combo.image}
+                    alt={combo.title}
+                    className="h-40 object-contain"
+                  />
+                </div>
 
-                <h3 className="text-sm font-semibold text-gray-900 mb-2">
+                <h3 className="text-base font-semibold text-gray-900 mb-2">
                   {combo.title}
                 </h3>
 
-                <div className="mb-4">
+                <div className="mb-3 flex items-center gap-2">
                   <span className="text-lg font-bold text-gray-900">
                     ₹{combo.price}
                   </span>
-                  <span className="ml-2 text-sm line-through text-gray-400">
+                  <span className="ml-1 text-sm line-through text-gray-400">
                     ₹{combo.mrp}
+                  </span>
+                  <span className="ml-auto text-[11px] text-amber-500">
+                    ★★★★☆
                   </span>
                 </div>
 
                 <button
                   onClick={() => addComboToCart(combo)}
                   className="
-                    w-full bg-[#1E2A5A] text-white
-                    py-2.5 rounded-full
-                    text-sm font-semibold
-                    hover:bg-[#16204A]
-                    transition
+                    btn-primary
                   "
                 >
                   Add To Cart

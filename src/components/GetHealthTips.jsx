@@ -1,4 +1,19 @@
+import { useState } from "react";
+
 export default function GetHealthTips() {
+  const [email, setEmail] = useState("");
+  const [agree, setAgree] = useState(false);
+  const [status, setStatus] = useState({ type: "", message: "" });
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    const ok = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+    if (!ok) return setStatus({ type: "error", message: "Please enter a valid email." });
+    if (!agree) return setStatus({ type: "error", message: "Please agree to receive updates." });
+    setStatus({ type: "success", message: "Thanks! You’re subscribed." });
+    setEmail("");
+    setAgree(false);
+  };
   return (
     <section className="relative py-14 bg-[#FBF7F2]">
       {/* soft separator from above section */}
@@ -30,25 +45,26 @@ export default function GetHealthTips() {
             offers — delivered occasionally, never spam.
           </p>
 
+          <div className="flex flex-wrap justify-center gap-2 mb-6">
+            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">Health Tips</span>
+            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">Recipes</span>
+            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">Exclusive Offers</span>
+          </div>
+
           {/* Input */}
-          <form
-            onSubmit={(e) => e.preventDefault()}
-            className="flex flex-col sm:flex-row gap-3 justify-center items-center"
-          >
-            <input
-              type="email"
-              required
-              placeholder="Enter your email address"
-              className="
-                w-full sm:w-80
-                px-5 py-3.5
-                rounded-xl
-                border border-gray-300
-                focus:outline-none
-                focus:ring-2 focus:ring-green-600
-                text-gray-800
-              "
-            />
+          <form onSubmit={onSubmit} className="flex flex-col gap-3 items-center">
+            <div className="relative w-full sm:w-[480px]">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="currentColor" strokeWidth="1.5"/><path d="M4 7l8 6 8-6" stroke="currentColor" strokeWidth="1.5"/></svg>
+              </span>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email address"
+                className={`input pl-10 ${status.type==='error' ? 'border-red-500 ring-2 ring-red-500' : ''}`}
+              />
+            </div>
 
             <button
               type="submit"
@@ -63,15 +79,27 @@ export default function GetHealthTips() {
                 transition
                 whitespace-nowrap
               "
+              disabled={!email || !agree}
             >
               Subscribe
             </button>
+
+            <label className="text-sm text-gray-700 flex items-center gap-2">
+              <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
+              I agree to receive health tips and offers
+            </label>
           </form>
 
           {/* Trust note */}
-          <p className="mt-4 text-xs text-gray-500">
-            No spam • Unsubscribe anytime • 100% natural goodness 🌿
-          </p>
+          <div className="mt-4 text-xs text-gray-500">
+            <p>No spam • Unsubscribe anytime • 100% natural goodness 🌿</p>
+          </div>
+
+          {status.message && (
+            <div className={`mt-3 text-sm ${status.type==='success' ? 'text-green-700' : 'text-red-600'}`}>
+              {status.message}
+            </div>
+          )}
         </div>
       </div>
     </section>
