@@ -208,7 +208,7 @@ export default function CartModal({ visible, onClose }) {
             disabled={items.length === 0}
             onClick={() => {
               onClose();
-              window.location.href = "/checkout";
+              window.location.href = "/cart";
             }}
             className="w-full bg-green-700 text-white py-3 rounded-xl font-semibold disabled:opacity-50"
           >

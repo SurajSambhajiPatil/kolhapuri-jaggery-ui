@@ -17,6 +17,8 @@ import Category from "./pages/Category";
 import Checkout from "./pages/Checkout"; // ✅ MISSING IMPORT (FIXED)
 import OrderTracker from "./pages/OrderTracker";
 import ResetPassword from "./pages/ResetPassword";
+import Cart from "./pages/Cart";
+import About from "./pages/About";
 
 
 import products from "./data/products";
@@ -30,6 +32,26 @@ export default function App() {
 
   const pathname =
     typeof window !== "undefined" ? window.location.pathname : "";
+
+  /* ================= CART PAGE ================= */
+  if (pathname === "/cart") {
+    return (
+      <>
+        <Navbar onLoginClick={() => setShowLogin(true)} />
+
+        <LoginModal
+          visible={showLogin}
+          onClose={() => setShowLogin(false)}
+        />
+
+        <CartDrawer />
+
+        <Cart />
+
+        <Footer />
+      </>
+    );
+  }
 
   /* ================= CHECKOUT PAGE ================= */
   if (pathname === "/checkout") {
@@ -100,6 +122,22 @@ if (pathname === "/orders") {
         />
         <CartDrawer />
         <ResetPassword />
+        <Footer />
+      </>
+    );
+  }
+
+  /* ================= ABOUT PAGE ================= */
+  if (pathname === "/about") {
+    return (
+      <>
+        <Navbar onLoginClick={() => setShowLogin(true)} />
+        <LoginModal
+          visible={showLogin}
+          onClose={() => setShowLogin(false)}
+        />
+        <CartDrawer />
+        <About />
         <Footer />
       </>
     );

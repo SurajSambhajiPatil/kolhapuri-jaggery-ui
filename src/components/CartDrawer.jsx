@@ -111,7 +111,7 @@ export default function CartDrawer() {
             </button>
           <button
   onClick={() => {
-    window.location.href = "/checkout";
+    window.location.href = "/cart";
   }}
   className="
     flex-1

@@ -1,16 +1,26 @@
-const STORAGE_KEY = "kolhapuri_cart";
+const BASE_KEY = "kolhapuri_cart";
+const USER_KEY = "current_user_id";
 
-function read() {
+function key() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const uid = localStorage.getItem(USER_KEY);
+    return uid ? `${BASE_KEY}:user:${uid}` : BASE_KEY;
+  } catch {
+    return BASE_KEY;
+  }
+}
+
+function read(k) {
+  try {
+    const raw = localStorage.getItem(k || key());
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
   }
 }
 
-function write(cart) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+function write(cart, k) {
+  localStorage.setItem(k || key(), JSON.stringify(cart));
   window.dispatchEvent(new CustomEvent("cartUpdated", { detail: cart }));
 }
 
@@ -43,8 +53,38 @@ export function clearCart() {
   write([]);
 }
 
+export function clearAllCarts() {
+  try {
+    const keys = Object.keys(localStorage);
+    keys.forEach((k) => {
+      if (k.startsWith("kolhapuri_cart")) {
+        localStorage.setItem(k, "[]");
+      }
+    });
+  } catch {}
+  window.dispatchEvent(new CustomEvent("cartUpdated", { detail: [] }));
+}
+
 export function subtotal() {
   return read().reduce((s, it) => s + (it.price || 0) * (it.qty || 1), 0);
+}
+
+export function mergeCarts(guestKey, userKey) {
+  const g = read(guestKey);
+  const u = read(userKey);
+  const byId = {};
+  [...u, ...g].forEach((it) => {
+    const prev = byId[it.id];
+    if (prev) {
+      byId[it.id] = { ...prev, qty: (prev.qty || 1) + (it.qty || 1) };
+    } else {
+      byId[it.id] = { ...it, qty: it.qty || 1 };
+    }
+  });
+  const merged = Object.values(byId);
+  write(merged, userKey);
+  localStorage.removeItem(guestKey);
+  return merged;
 }
 
 export default { getCart, addToCart, updateQty, removeItem, clearCart, subtotal };

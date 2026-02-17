@@ -1,4 +1,4 @@
-import { ChevronDown, ShoppingCart, Menu, X } from "lucide-react";
+import { ChevronDown, ShoppingCart, Menu, X, User, ClipboardList } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getCart } from "../lib/cart";
 import { useAuth } from "../lib/auth";
@@ -76,6 +76,9 @@ const goHomeAndScroll = (id) => {
             >
               Home
             </li>
+            <li>
+              <a href="/about" className="hover:text-green-700">About</a>
+            </li>
 
             <li className="relative group">
            <button
@@ -140,12 +143,12 @@ const goHomeAndScroll = (id) => {
   {user ? (
     <>
       <span className="hidden md:inline text-sm text-gray-700">
-        {user.email}
+        {user?.user_metadata?.full_name || user?.email || user?.user_metadata?.mobile || "Account"}
       </span>
       <button
         onClick={logout}
-        className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-semibold
-                 hover:border-red-600 hover:text-red-600 transition"
+        className="px-3 py-2 rounded-lg border border-gray-300 text-sm font-semibold
+                 hover:border-red-600 hover:text-red-600 transition flex items-center gap-2"
       >
         Logout
       </button>
@@ -153,9 +156,10 @@ const goHomeAndScroll = (id) => {
   ) : (
     <button
       onClick={() => onLoginClick && onLoginClick()}
-      className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-semibold
-                 hover:border-green-700 hover:text-green-700 transition"
+      className="px-3 py-2 rounded-lg border border-gray-300 text-sm font-semibold
+                 hover:border-green-700 hover:text-green-700 transition flex items-center gap-2"
     >
+      <User size={16} />
       Login
     </button>
   )}
@@ -163,9 +167,10 @@ const goHomeAndScroll = (id) => {
   {/* ORDERS */}
   <button
     onClick={() => (window.location.href = "/orders")}
-    className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-semibold
-               hover:border-green-700 hover:text-green-700 transition"
+    className="px-3 py-2 rounded-lg border border-gray-300 text-sm font-semibold
+               hover:border-green-700 hover:text-green-700 transition flex items-center gap-2"
   >
+    <ClipboardList size={16} />
     Orders
   </button>
 
@@ -204,6 +209,15 @@ const goHomeAndScroll = (id) => {
               className="cursor-pointer hover:text-green-700"
             >
               Home
+            </li>
+            <li
+              onClick={() => {
+                setMobileOpen(false);
+                window.location.href = "/about";
+              }}
+              className="cursor-pointer hover:text-green-700"
+            >
+              About
             </li>
             <li
               onClick={() => {

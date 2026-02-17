@@ -8,7 +8,7 @@ const SLIDES = [
     discount: 50,
     description: "Pure Kolhapuri Jaggery · Traditional · Chemical-Free",
     coupon: "WELCOME-GUDORA50",
-    heroImage: "/images/products/AllProduct.png",
+    heroImage: "/images/products/bulk-new-products.png",
     supportLeft: "/images/products/Jaggery-Blocks.png",
     supportRight: "/images/products/Jaggery-Powder-Bottle.png",
   },
@@ -18,7 +18,7 @@ const SLIDES = [
     discount: 30,
     description: "Farm-fresh jaggery made using Kolhapuri methods",
     coupon: "GUDORAYEAR30",
-    heroImage: "/images/products/AllProduct.png",
+    heroImage: "/images/products/bulk-new-products.png",
     supportLeft: "/images/products/Jaggery-Blocks.png",
     supportRight: "/images/products/Jaggery-Powder-Bottle.png",
   },
@@ -28,7 +28,7 @@ const SLIDES = [
     discount: 20,
     description: "Best value packs for families & bulk buyers",
     coupon: "AUTO-APPLIED",
-    heroImage: "/images/products/AllProduct.png",
+    heroImage: "/images/products/bulk-new-products.png",
     supportLeft: "/images/products/Jaggery-Blocks.png",
     supportRight: "/images/products/Jaggery-Powder-Bottle.png",
   },
@@ -150,7 +150,8 @@ export default function Hero() {
                   <img
                     src={s.heroImage}
                     alt="Gudora products"
-                    className="w-[340px] md:w-[380px] object-contain"
+                    className="w-[380px] md:w-[440px] object-contain"
+                    onError={(e) => { e.currentTarget.src = "/images/products/AllProduct.png"; }}
                   />
                 </div>
 
