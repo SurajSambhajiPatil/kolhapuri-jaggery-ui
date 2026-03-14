@@ -9,7 +9,9 @@ export default function OrderSummary() {
   }, []);
 
   const total = cart.subtotal();
-  const shipping = total > 999 ? 0 : 80;
+  const shippingThreshold = 499;
+  const isFreeShipping = total >= shippingThreshold;
+  const shipping = isFreeShipping ? 0 : 80;
   const grandTotal = total + shipping;
 
   const placeOrder = () => {
@@ -27,50 +29,54 @@ export default function OrderSummary() {
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-lg p-8">
-      <h2 className="text-xl font-semibold mb-6">
+    <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl p-8">
+      <h2 className="text-2xl font-black text-slate-900 mb-8 tracking-tight">
         Order Summary
       </h2>
 
-      <div className="space-y-4 mb-6">
+      <div className="space-y-6 mb-8">
         {items.map((item) => (
-          <div key={item.id} className="flex gap-4 items-center">
-            <img src={item.image} className="h-16 w-16 object-contain bg-gray-50 rounded" />
-            <div className="flex-1">
-              <p className="font-medium">{item.name}</p>
-              <p className="text-sm text-gray-500">Qty: {item.qty}</p>
+          <div key={item.id} className="flex gap-4 items-center group">
+            <div className="h-20 w-20 flex-shrink-0 bg-slate-50 rounded-2xl p-3 border border-slate-100 group-hover:border-green-100 transition-colors">
+              <img src={item.image} className="h-full w-full object-contain drop-shadow-md" alt={item.name} />
             </div>
-            <p className="font-semibold">₹{item.price * item.qty}</p>
+            <div className="flex-1">
+              <p className="font-black text-slate-900 tracking-tight">{item.name}</p>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Qty: {item.qty}</p>
+            </div>
+            <p className="font-black text-slate-900 tracking-tight text-lg">₹{item.price * item.qty}</p>
           </div>
         ))}
       </div>
 
-      <div className="border-t pt-4 space-y-2 text-sm">
-        <div className="flex justify-between">
+      <div className="bg-slate-50 rounded-[2rem] p-6 border border-slate-100 space-y-4">
+        <div className="flex justify-between text-[11px] font-black text-slate-500 uppercase tracking-widest">
           <span>Subtotal</span>
-          <span>₹{total}</span>
+          <span className="text-slate-900">₹{total}</span>
         </div>
 
-        <div className="flex justify-between">
+        <div className="flex justify-between text-[11px] font-black text-slate-500 uppercase tracking-widest">
           <span>Shipping</span>
-          <span>{shipping === 0 ? "FREE" : `₹${shipping}`}</span>
+          <span className={`font-black ${shipping === 0 ? "text-green-700" : "text-slate-900"}`}>
+            {shipping === 0 ? "FREE" : `₹${shipping}`}
+          </span>
         </div>
 
-        <div className="flex justify-between text-lg font-bold">
-          <span>Total</span>
-          <span>₹{grandTotal}</span>
+        <div className="pt-4 mt-2 border-t border-slate-200 flex justify-between items-center">
+          <span className="text-sm font-black text-slate-900 uppercase tracking-widest">Total Amount</span>
+          <span className="text-3xl font-black text-[#1F6F43] tracking-tighter">₹{grandTotal}</span>
         </div>
       </div>
 
       <button
         onClick={placeOrder}
-        className="w-full mt-6 bg-green-700 text-white py-4 rounded-xl text-lg font-semibold hover:bg-green-800 transition"
+        className="w-full mt-8 btn-premium-primary py-5 text-base shadow-xl shadow-green-900/20"
       >
-        Place Order
+        Place Order (COD)
       </button>
 
-      <p className="text-xs text-gray-500 text-center mt-4">
-        By placing the order, you agree to our terms & conditions.
+      <p className="text-[10px] font-bold text-slate-400 text-center mt-6 uppercase tracking-widest">
+        ✔ Secure Checkout • COD Available
       </p>
     </div>
   );

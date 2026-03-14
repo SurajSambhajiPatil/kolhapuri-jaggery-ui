@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import * as cart from "../lib/cart";
 import { useAuth } from "../lib/auth.jsx";
 import LoginModal from "../components/LoginModal";
+import { ShoppingBag, ArrowRight, Trash2, Minus, Plus, ShieldCheck, Truck, RefreshCw } from "lucide-react";
 
 export default function CartPage() {
   const { user } = useAuth();
@@ -21,7 +22,7 @@ export default function CartPage() {
 
   const sub = cart.subtotal();
   const total = Math.max(sub - discount, 0);
-  const freeShipThreshold = 999;
+  const freeShipThreshold = 499;
   const shipping = total >= freeShipThreshold || total === 0 ? 0 : 80;
   const grandTotal = total + shipping;
 
@@ -41,89 +42,108 @@ export default function CartPage() {
   };
 
   return (
-    <section className="min-h-screen bg-gradient-to-b from-green-50 to-white pt-24 pb-20 px-4 sm:px-6">
+    <section className="min-h-screen bg-[#F7F5EF] pt-24 sm:pt-32 pb-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl md:text-4xl font-extrabold text-green-800">Your Cart</h1>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-12 gap-4">
+          <div className="reveal">
+            <span className="text-[#1F6F43] font-black text-[10px] uppercase tracking-[0.3em] mb-2 block">Checkout Process</span>
+            <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tighter leading-none">Your Cart</h1>
+          </div>
           {items.length > 0 && (
-            <div className="hidden md:flex items-center gap-2 text-sm">
-              <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 font-semibold">Secure Checkout</span>
-              <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-700 font-semibold">Free returns</span>
+            <div className="flex items-center gap-3 sm:gap-4 reveal">
+              <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-stone-200 shadow-sm text-[10px] font-bold text-slate-600">
+                <ShieldCheck size={14} className="text-green-600" />
+                Secure
+              </div>
+              <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-stone-200 shadow-sm text-[10px] font-bold text-slate-600">
+                <Truck size={14} className="text-green-600" />
+                Tracked
+              </div>
             </div>
           )}
         </div>
 
         {items.length > 0 && (
-          <div className="mb-6 rounded-2xl bg-white shadow p-4">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-medium text-gray-700">
-                {total >= freeShipThreshold ? "You’ve unlocked free shipping" : `Add ₹${freeShipThreshold - total} more for free shipping`}
+          <div className="mb-8 rounded-[2rem] bg-white shadow-xl shadow-green-900/5 p-6 border border-white reveal">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+              <span className="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-widest">
+                {total >= freeShipThreshold ? "🎉 You've unlocked free shipping!" : `₹${freeShipThreshold - total} more for free shipping`}
               </span>
-              <span className="text-gray-500">Subtotal ₹{total}</span>
+              <span className="text-xs font-bold text-slate-400">Current Subtotal: <b className="text-green-800">₹{total}</b></span>
             </div>
-            <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
               <div
-                className="h-full bg-green-600 rounded-full"
+                className="h-full bg-gradient-to-r from-green-600 to-green-400 transition-all duration-1000 ease-out"
                 style={{ width: `${Math.min(100, (total / freeShipThreshold) * 100)}%` }}
               />
             </div>
           </div>
         )}
 
-        <div className="grid md:grid-cols-12 gap-6 lg:gap-8">
-          <div className="md:col-span-8">
-            <div className="bg-white rounded-2xl shadow divide-y">
+        <div className="grid md:grid-cols-12 gap-8 lg:gap-12 items-start">
+          <div className="md:col-span-8 space-y-6 reveal">
+            <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-white overflow-hidden divide-y divide-slate-50">
               {items.length === 0 ? (
-                <div className="text-center text-gray-600 py-16">
-                  <img src="/images/hero/GudoraFoods-FinalLogo.png" alt="Gudora" className="h-16 mx-auto mb-4 opacity-80" />
-                  <div className="text-lg font-semibold">Your cart is empty</div>
+                <div className="text-center py-24 px-8">
+                  <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-8">
+                    <ShoppingBag size={40} className="text-slate-200" />
+                  </div>
+                  <h2 className="text-2xl font-black text-slate-900 mb-4">Your cart is empty</h2>
+                  <p className="text-slate-500 font-medium mb-10 max-w-xs mx-auto leading-relaxed">
+                    Looks like you haven't added any natural goodness to your cart yet.
+                  </p>
                   <button
                     onClick={() => (window.location.href = "/")}
-                    className="mt-6 px-6 py-3 rounded-xl bg-green-700 hover:bg-green-800 text-white font-semibold"
+                    className="btn-premium-primary"
                   >
                     Continue Shopping
                   </button>
                 </div>
               ) : (
                 items.map((it) => (
-                  <div key={it.id} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4 hover:bg-green-50/30 transition">
-                    <div className="flex items-center gap-4 flex-1">
-                      <img src={it.image} alt={it.name} className="h-16 w-16 sm:h-20 sm:w-20 object-contain bg-gray-50 rounded-lg border" />
-                      <div className="min-w-0">
-                        <div className="font-semibold text-gray-900 truncate">{it.name}</div>
-                        <div className="text-sm text-gray-600">₹{it.price}</div>
-                      </div>
+                  <div key={it.id} className="p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 group hover:bg-slate-50/50 transition-colors duration-500">
+                    <div className="h-24 w-24 sm:h-32 sm:w-32 flex-shrink-0 bg-slate-50 rounded-[2rem] p-4 border border-slate-100 group-hover:border-green-100 transition-colors relative">
+                      <img src={it.image} alt={it.name} className="h-full w-full object-contain drop-shadow-lg transition-transform duration-500 group-hover:scale-110" />
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => cart.updateQty(it.id, Math.max(0, (it.qty || 1) - 1))}
-                        className="h-9 w-9 rounded-lg border border-gray-300 hover:border-green-700 hover:text-green-700"
-                        aria-label="Decrease quantity"
-                      >
-                        −
-                      </button>
-                      <span className="min-w-[2ch] text-center">{it.qty}</span>
-                      <button
-                        onClick={() => cart.updateQty(it.id, (it.qty || 1) + 1)}
-                        className="h-9 w-9 rounded-lg border border-gray-300 hover:border-green-700 hover:text-green-700"
-                        aria-label="Increase quantity"
-                      >
-                        +
-                      </button>
-                    </div>
-
-                    <div className="sm:ml-auto flex items-center gap-6">
-                      <div className="text-right">
-                        <div className="text-sm text-gray-500">Total</div>
-                        <div className="font-bold text-green-700">₹{(it.price || 0) * (it.qty || 1)}</div>
+                    <div className="flex-1 text-center sm:text-left min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-4">
+                        <div>
+                          <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-tight group-hover:text-green-900 transition-colors">{it.name}</h3>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">₹{it.price} Per Unit</p>
+                        </div>
+                        <button
+                          onClick={() => cart.removeItem(it.id)}
+                          className="text-slate-300 hover:text-red-500 transition-all duration-300 p-2 hover:bg-red-50 rounded-xl mx-auto sm:mx-0"
+                          aria-label="Remove item"
+                        >
+                          <Trash2 size={18} />
+                        </button>
                       </div>
-                      <button
-                        onClick={() => cart.removeItem(it.id)}
-                        className="text-red-600 hover:text-red-700 text-sm font-semibold"
-                      >
-                        Remove
-                      </button>
+
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+                        <div className="flex items-center bg-slate-100 rounded-2xl p-1 border border-slate-200/50">
+                          <button
+                            onClick={() => cart.updateQty(it.id, Math.max(0, (it.qty || 1) - 1))}
+                            className="p-2 hover:bg-white rounded-xl text-slate-400 hover:text-slate-900 transition-all active:scale-90"
+                            aria-label="Decrease quantity"
+                          >
+                            <Minus size={16} />
+                          </button>
+                          <span className="w-10 text-center text-sm font-black text-slate-900">{it.qty}</span>
+                          <button
+                            onClick={() => cart.updateQty(it.id, (it.qty || 1) + 1)}
+                            className="p-2 hover:bg-white rounded-xl text-slate-400 hover:text-slate-900 transition-all active:scale-90"
+                            aria-label="Increase quantity"
+                          >
+                            <Plus size={16} />
+                          </button>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Item Total</p>
+                          <p className="text-xl font-black text-green-800 tracking-tighter">₹{(it.price || 0) * (it.qty || 1)}</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))
@@ -131,80 +151,96 @@ export default function CartPage() {
             </div>
           </div>
 
-          <div className="md:col-span-4">
-            <div className="bg-white rounded-2xl shadow p-6 md:sticky md:top-24">
-              <h2 className="text-lg font-semibold mb-4">Summary</h2>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
+          <div className="md:col-span-4 reveal">
+            <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-white p-8 md:sticky md:top-32">
+              <h2 className="text-2xl font-black text-slate-900 tracking-tight mb-8">Summary</h2>
+              
+              <div className="space-y-4 mb-8">
+                <div className="flex justify-between text-[11px] font-black text-slate-500 uppercase tracking-widest">
                   <span>Subtotal</span>
-                  <span>₹{total}</span>
+                  <span className="text-slate-900">₹{total}</span>
                 </div>
-                <div className="flex justify-between text-green-700">
-                  <span>Discount</span>
+                <div className="flex justify-between text-[11px] font-black text-green-700 uppercase tracking-widest">
+                  <span>Coupon Discount</span>
                   <span>-₹{discount}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Shipping</span>
-                  <span>{shipping === 0 ? "Free" : `₹${shipping}`}</span>
+                <div className="flex justify-between text-[11px] font-black text-slate-500 uppercase tracking-widest">
+                  <span>Estimated Shipping</span>
+                  <span className={`font-black ${shipping === 0 ? "text-green-700" : "text-slate-900"}`}>
+                    {shipping === 0 ? "FREE" : `₹${shipping}`}
+                  </span>
                 </div>
-                <div className="border-t pt-3 flex justify-between font-bold">
-                  <span>Total</span>
-                  <span className="text-green-700">₹{grandTotal}</span>
+                <div className="pt-6 mt-2 border-t border-slate-100 flex justify-between items-center">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Grand Total</span>
+                    <span className="text-[10px] font-bold text-slate-500">(Incl. GST)</span>
+                  </div>
+                  <span className="text-3xl font-black text-[#1F6F43] tracking-tighter">₹{grandTotal}</span>
                 </div>
               </div>
 
-              <div className="mt-4 flex gap-3">
-                <input
-                  value={coupon}
-                  onChange={(e) => setCoupon(e.target.value)}
-                  placeholder="Coupon code (optional)"
-                  className="flex-1 px-3 py-2 rounded-lg border border-gray-300"
-                />
-                <button onClick={applyCoupon} className="px-4 py-2 bg-green-700 text-white rounded-lg font-semibold">
-                  Apply
-                </button>
+              <div className="space-y-4 mb-8">
+                <div className="flex gap-2">
+                  <input
+                    value={coupon}
+                    onChange={(e) => setCoupon(e.target.value)}
+                    placeholder="Coupon Code"
+                    className="flex-1 bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-[#1F6F43] focus:bg-white transition-all"
+                  />
+                  <button 
+                    onClick={applyCoupon} 
+                    className="bg-slate-900 text-white px-6 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-colors"
+                  >
+                    Apply
+                  </button>
+                </div>
               </div>
 
               <button
                 disabled={items.length === 0}
                 onClick={proceed}
-                className="mt-6 w-full bg-green-700 hover:bg-green-800 text-white py-3 rounded-xl font-semibold disabled:opacity-50"
+                className="w-full btn-premium-primary py-5 text-base shadow-xl shadow-green-900/20 flex items-center justify-center gap-3 group/btn"
               >
-                Checkout
+                Proceed to Checkout
+                <ArrowRight size={20} className="group-hover/btn:translate-x-1 transition-transform" />
               </button>
 
               {showGate && !user && (
-                <div className="mt-4 p-4 border rounded-xl bg-green-50/60 space-y-3">
-                  <div className="text-sm text-gray-700">Choose an option</div>
-                  <button
-                    onClick={() => {
-                      try { localStorage.setItem("postLoginRedirect", "/checkout"); } catch {}
-                      setShowLogin(true);
-                    }}
-                    className="w-full border border-gray-300 rounded-lg py-2 font-semibold hover:border-green-700 hover:text-green-700"
-                  >
-                    Login
-                  </button>
-                  <button
-                    onClick={() => {
-                      try { localStorage.setItem("checkoutAsGuest", "1"); } catch {}
-                      window.location.href = "/checkout";
-                    }}
-                    className="w-full border border-gray-300 rounded-lg py-2 font-semibold hover:border-green-700 hover:text-green-700"
-                  >
-                    Continue as Guest
-                  </button>
-                  <button
-                    onClick={() => {
-                      try { localStorage.setItem("postLoginRedirect", "/checkout"); } catch {}
-                      setShowLogin(true);
-                    }}
-                    className="w-full border border-gray-300 rounded-lg py-2 font-semibold hover:border-green-700 hover:text-green-700"
-                  >
-                    Register
-                  </button>
+                <div className="mt-8 p-6 rounded-[2rem] bg-green-50/50 border border-green-100 space-y-4 reveal">
+                  <p className="text-xs font-black text-[#1F6F43] uppercase tracking-widest text-center mb-2">Choose Checkout Method</p>
+                  <div className="grid gap-3">
+                    <button
+                      onClick={() => {
+                        try { localStorage.setItem("postLoginRedirect", "/checkout"); } catch {}
+                        setShowLogin(true);
+                      }}
+                      className="w-full bg-white border-2 border-green-100 rounded-2xl py-3 text-xs font-black text-[#1F6F43] uppercase tracking-widest hover:bg-[#1F6F43] hover:text-white transition-all duration-300"
+                    >
+                      Login to Account
+                    </button>
+                    <button
+                      onClick={() => {
+                        try { localStorage.setItem("checkoutAsGuest", "1"); } catch {}
+                        window.location.href = "/checkout";
+                      }}
+                      className="w-full bg-white border-2 border-slate-100 rounded-2xl py-3 text-xs font-black text-slate-500 uppercase tracking-widest hover:border-slate-300 hover:text-slate-900 transition-all duration-300"
+                    >
+                      Checkout as Guest
+                    </button>
+                  </div>
                 </div>
               )}
+
+              <div className="mt-8 pt-8 border-t border-slate-100 flex flex-wrap justify-center gap-6">
+                <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                  <RefreshCw size={14} className="text-green-600" />
+                  Easy Returns
+                </div>
+                <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                  <ShieldCheck size={14} className="text-green-600" />
+                  Secure SSL
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -9,244 +9,30 @@ import BecomeSeller from "./components/BecomeSeller";
 import GetHealthTips from "./components/GetHealthTips";
 import Footer from "./components/Footer";
 import WhyGudoraFood from "./components/WhyGudoraFood";
+import ProcessSection from "./components/ProcessSection";
 
 import LoginModal from "./components/LoginModal";
+import JoinUsModal from "./components/JoinUsModal";
 import CartDrawer from "./components/CartDrawer";
 
 import Category from "./pages/Category";
-import Checkout from "./pages/Checkout"; // ✅ MISSING IMPORT (FIXED)
+import Checkout from "./pages/Checkout"; 
 import OrderTracker from "./pages/OrderTracker";
 import ResetPassword from "./pages/ResetPassword";
 import Cart from "./pages/Cart";
 import About from "./pages/About";
 
-
 import products from "./data/products";
-
 
 export default function App() {
   const [showLogin, setShowLogin] = useState(false);
+  const [showJoin, setShowJoin] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const scrollerRef = useRef(null);
   const [progress, setProgress] = useState(0);
 
   const pathname =
     typeof window !== "undefined" ? window.location.pathname : "";
-
-  /* ================= CART PAGE ================= */
-  if (pathname === "/cart") {
-    return (
-      <>
-        <Navbar onLoginClick={() => setShowLogin(true)} />
-
-        <LoginModal
-          visible={showLogin}
-          onClose={() => setShowLogin(false)}
-        />
-
-        <CartDrawer />
-
-        <Cart />
-
-        <Footer />
-      </>
-    );
-  }
-
-  /* ================= CHECKOUT PAGE ================= */
-  if (pathname === "/checkout") {
-    return (
-      <>
-        <Navbar onLoginClick={() => setShowLogin(true)} />
-
-        <LoginModal
-          visible={showLogin}
-          onClose={() => setShowLogin(false)}
-        />
-
-        <CartDrawer />
-
-        <Checkout />
-
-        <Footer />
-      </>
-    );
-  }
-
-  /* ================= CATEGORY PAGE ================= */
-  if (pathname.startsWith("/category/")) {
-    const slug = pathname.replace("/category/", "").split("/")[0];
-
-    return (
-      <>
-        <Navbar onLoginClick={() => setShowLogin(true)} />
-
-        <LoginModal
-          visible={showLogin}
-          onClose={() => setShowLogin(false)}
-        />
-
-        <CartDrawer />
-
-        <Category slug={slug} />
-
-        <Footer />
-      </>
-    );
-  }
-
-  /* ================= ORDER TRACKER ================= */
-if (pathname === "/orders") {
-  return (
-    <>
-      <Navbar onLoginClick={() => setShowLogin(true)} />
-      <LoginModal
-        visible={showLogin}
-        onClose={() => setShowLogin(false)}
-      />
-      <CartDrawer />
-      <OrderTracker />
-      <Footer />
-    </>
-  );
-}
-
-  /* ================= RESET PASSWORD ================= */
-  if (pathname === "/reset") {
-    return (
-      <>
-        <Navbar onLoginClick={() => setShowLogin(true)} />
-        <LoginModal
-          visible={showLogin}
-          onClose={() => setShowLogin(false)}
-        />
-        <CartDrawer />
-        <ResetPassword />
-        <Footer />
-      </>
-    );
-  }
-
-  /* ================= ABOUT PAGE ================= */
-  if (pathname === "/about") {
-    return (
-      <>
-        <Navbar onLoginClick={() => setShowLogin(true)} />
-        <LoginModal
-          visible={showLogin}
-          onClose={() => setShowLogin(false)}
-        />
-        <CartDrawer />
-        <About />
-        <Footer />
-      </>
-    );
-  }
-
-  /* ================= HOME PAGE ================= */
-  return (
-    <>
-      <Navbar onLoginClick={() => setShowLogin(true)} />
-
-      <LoginModal
-        visible={showLogin}
-        onClose={() => setShowLogin(false)}
-      />
-
-      {/* GLOBAL CART */}
-      <CartDrawer />
-
-      <Hero />
-
-      {/* PRODUCTS */}
-      <section className="relative bg-white" id="products"> 
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-green-200 to-transparent" />
-        <div className="max-w-[1400px] mx-auto px-6 py-20">
-        <h2 className="text-center text-3xl md:text-4xl font-semibold mb-6 text-[#5A3214]">
-          Bestsellers
-        </h2>
-        <div className="flex items-center justify-center gap-3 mb-10 flex-wrap sticky top-16 z-20 bg-white/70 backdrop-blur-sm py-3">
-          {[
-            ["all", "All"],
-            ["powder", "Powder"],
-            ["blocks", "Blocks"],
-            ["organic", "Organic"],
-            ["premium", "Premium"],
-          ].map(([val, label]) => (
-            <button
-              key={val}
-              onClick={() => setSelectedCategory(val)}
-              className={`px-4 py-2 rounded-full text-sm font-semibold border transition ${
-                selectedCategory === val
-                  ? "bg-green-700 text-white border-green-700"
-                  : "bg-white text-gray-700 border-gray-300 hover:border-green-700 hover:text-green-700"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        <div className="relative">
-          <div
-            className="overflow-x-auto scrollbar-hide"
-            ref={scrollerRef}
-          >
-            <div className="flex gap-6">
-              {(selectedCategory === "all"
-                ? products
-                : products.filter((p) => p.category === selectedCategory)
-              ).map((p) => (
-                <div key={p.id} className="w-[260px] sm:w-[300px] flex-shrink-0">
-                  <ProductCard product={p} />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <button
-              onClick={() => scrollerRef.current && scrollerRef.current.scrollBy({ left: -320, behavior: "smooth" })}
-              className="absolute left-1 top-1/2 -translate-y-1/2 bg-white/90 border rounded-full shadow px-3 py-3"
-              aria-label="Previous"
-            >
-              ‹
-            </button>
-            <button
-              onClick={() => scrollerRef.current && scrollerRef.current.scrollBy({ left: 320, behavior: "smooth" })}
-              className="absolute right-1 top-1/2 -translate-y-1/2 bg-white/90 border rounded-full shadow px-3 py-3"
-              aria-label="Next"
-            >
-              ›
-            </button>
-          </div>
-
-          <div className="mt-6 h-2 bg-gray-200 rounded-full">
-            <div
-              className="h-2 bg-green-600 rounded-full transition-all"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        </div>
-        </div>
-      </section>
-
-      <ComboSection />
-      <WhyGudoraFood />
-
-      <section id="reviews">
-        <CustomerReviews />
-      </section>
-
-      <section id="become-seller">
-        <BecomeSeller />
-      </section>
-
-      
-
-      <GetHealthTips />
-      <Footer />
-    </>
-  );
 
   useEffect(() => {
     const el = scrollerRef.current;
@@ -262,14 +48,180 @@ if (pathname === "/orders") {
   }, [selectedCategory]);
 
   useEffect(() => {
-  const target = localStorage.getItem("scrollTarget");
-  if (target) {
-    setTimeout(() => {
-      const el = document.getElementById(target);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-      localStorage.removeItem("scrollTarget");
-    }, 100);
-  }
-}, []);
+    const target = localStorage.getItem("scrollTarget");
+    if (target) {
+      setTimeout(() => {
+        const el = document.getElementById(target);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        localStorage.removeItem("scrollTarget");
+      }, 100);
+    }
+  }, []);
 
+  useEffect(() => {
+    if (window.location.pathname !== "/") return;
+    const sp = new URLSearchParams(window.location.search);
+    if (sp.get("joinus") === "1") {
+      setShowJoin(true);
+      return;
+    }
+    const until = parseInt(localStorage.getItem("joinUsDismissedUntil") || "0", 10);
+    if (until && until > Date.now()) return;
+    const subscribed = localStorage.getItem("joinUsSubscribed") === "true";
+    if (subscribed) return;
+    const t = setTimeout(() => setShowJoin(true), 6000);
+    const onScroll = () => {
+      if (window.scrollY > 200) {
+        setShowJoin(true);
+        window.removeEventListener("scroll", onScroll);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
+
+  /* ================= SHARED COMPONENTS ================= */
+  const renderShared = () => (
+    <>
+      <Navbar onLoginClick={() => setShowLogin(true)} />
+      <LoginModal visible={showLogin} onClose={() => setShowLogin(false)} />
+      <CartDrawer />
+    </>
+  );
+
+  /* ================= ROUTING ================= */
+  if (pathname === "/cart") {
+    return (
+      <>
+        {renderShared()}
+        <Cart />
+        <Footer />
+      </>
+    );
+  }
+
+  if (pathname === "/checkout") {
+    return (
+      <>
+        {renderShared()}
+        <Checkout />
+        <Footer />
+      </>
+    );
+  }
+
+  if (pathname.startsWith("/category/")) {
+    const slug = pathname.replace("/category/", "").split("/")[0];
+    return (
+      <>
+        {renderShared()}
+        <Category slug={slug} />
+        <Footer />
+      </>
+    );
+  }
+
+  if (pathname === "/orders") {
+    return (
+      <>
+        {renderShared()}
+        <OrderTracker />
+        <Footer />
+      </>
+    );
+  }
+
+  if (pathname === "/reset") {
+    return (
+      <>
+        {renderShared()}
+        <ResetPassword />
+        <Footer />
+      </>
+    );
+  }
+
+  if (pathname === "/about") {
+    return (
+      <>
+        {renderShared()}
+        <About />
+        <Footer />
+      </>
+    );
+  }
+
+  /* ================= HOME PAGE ================= */
+  const filteredProducts = selectedCategory === "all" 
+    ? products 
+    : products.filter((p) => p.category === selectedCategory);
+
+  return (
+    <>
+      {renderShared()}
+      <JoinUsModal visible={showJoin} onClose={() => setShowJoin(false)} />
+
+      <Hero />
+
+      {/* PRODUCTS */}
+      <section className="relative bg-[#fafaf8] py-24 md:py-32" id="products"> 
+        <div className="section-container">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+            <div className="reveal">
+              <span className="text-green-700 font-black text-xs uppercase tracking-[0.3em] mb-4 block">Our Catalog</span>
+              <h2 className="text-5xl md:text-6xl font-black text-slate-900 tracking-tighter leading-none">
+                Bestsellers
+              </h2>
+            </div>
+            
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-2 md:pb-0 reveal">
+              {[
+                ["all", "All"],
+                ["powder", "Powder"],
+                ["blocks", "Blocks"],
+                ["organic", "Organic"],
+                ["premium", "Premium"],
+              ].map(([id, label]) => (
+                <button
+                  key={id}
+                  onClick={() => setSelectedCategory(id)}
+                  className={`px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+                    selectedCategory === id
+                      ? "bg-green-900 text-white shadow-xl shadow-green-900/20"
+                      : "bg-white text-slate-400 border border-slate-100 hover:border-slate-300 hover:text-slate-900"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
+            {filteredProducts.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <ComboSection />
+      <ProcessSection />
+      <WhyGudoraFood />
+
+      <section id="reviews">
+        <CustomerReviews />
+      </section>
+
+      <section id="become-seller">
+        <BecomeSeller />
+      </section>
+
+      <GetHealthTips />
+      <Footer />
+    </>
+  );
 }

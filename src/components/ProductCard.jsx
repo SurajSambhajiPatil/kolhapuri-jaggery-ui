@@ -1,349 +1,228 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import ProductThreeView from "./ProductThreeView";
+import { Star, ShoppingCart, Eye, Heart, Info, X, Minus, Plus, Truck, ShieldCheck } from "lucide-react";
 
 export default function ProductCard({ product }) {
-  const images =
-    product.images && product.images.length
-      ? product.images
-      : [product.image];
-
-  const preferredPinnedIndex = () => {
-    if (!images || !images.length) return 0;
-    const idx = images.findIndex((u) =>
-      typeof u === "string" &&
-      (u.includes("/images/uploads/jaggery-powder") || u.toLowerCase().includes("jaggery-powder"))
-    );
-    return idx >= 0 ? idx : 0;
-  };
-
-  const initialIndex = preferredPinnedIndex();
-  const [activeImage, setActiveImage] = useState(initialIndex);
+  const images = product.images && product.images.length ? product.images : [product.image];
+  const [activeImage, setActiveImage] = useState(0);
   const [fav, setFav] = useState(false);
   const [open, setOpen] = useState(false);
-  const baseWeight = (product.weight || "").toLowerCase();
-  const variantOptions = ["500g", "1kg"];
-  const [variant, setVariant] = useState(
-    baseWeight.includes("1kg") ? "1kg" : "500g"
-  );
   const [qty, setQty] = useState(1);
   const [viewerMode, setViewerMode] = useState("image");
-  const [fixedModalImage, setFixedModalImage] = useState(null);
 
-  const cardImage = images[initialIndex] || images[0];
+  const cardImage = images[activeImage] || images[0];
 
-  const priceForVariant = (base) => {
-    if (variant === "1kg") {
-      return baseWeight.includes("500g") ? Math.max(base * 2 - 20, base) : base;
-    }
-    if (variant === "500g") {
-      return baseWeight.includes("1kg") ? Math.max(Math.round(base / 2 + 20), 1) : base;
-    }
-    return base;
-  };
-
-  const preferredModalIndex = () => {
-    if (!images || !images.length) return -1;
-    const jarIdx = images.findIndex((u) =>
-      typeof u === "string" &&
-      (u.includes("/images/uploads/jaggery-powder") || u.toLowerCase().includes("jaggery-powder"))
-    );
-    return jarIdx >= 0 ? jarIdx : 0;
-  };
-
-  useEffect(() => {
-    let cancelled = false;
-    const start = preferredModalIndex();
-    const tryLoad = (i) => {
-      if (i < 0 || i >= images.length) return;
-      const test = new Image();
-      test.onload = () => {
-        if (!cancelled) {
-          setActiveImage(i);
-          setFixedModalImage(images[i]);
-        }
-      };
-      test.onerror = () => {
-        if (!cancelled) tryLoad(i + 1);
-      };
-      test.src = images[i];
-    };
-    tryLoad(start);
-    return () => { cancelled = true; };
-  }, [product.id]);
   return (
-    <div
-      className="
-        bg-white rounded-3xl
-        shadow-md hover:shadow-2xl
-        transition-all duration-300
-        border border-black/5
-        overflow-hidden
-        h-[460px]
-        flex flex-col
-        relative
-        group
-      "
+    <div 
+      className="card-premium group flex flex-col min-h-[480px] sm:min-h-[540px] bg-white reveal"
       onMouseLeave={() => setActiveImage(0)}
-      onMouseLeaveCapture={() => setActiveImage(initialIndex)}
     >
-      {/* ❤️ FAVORITE */}
-      <button
-        onClick={() => setFav(!fav)}
-        className="
-          absolute top-4 right-4 z-20
-          h-10 w-10 rounded-full
-          bg-white/90 backdrop-blur
-          shadow
-          flex items-center justify-center
-          transition
-          hover:scale-110
-        "
-      >
-        <span
-          className={`text-lg ${
-            fav ? "text-red-500 scale-110" : "text-gray-400"
-          }`}
-        >
-          ♥
-        </span>
-      </button>
-
       {/* IMAGE AREA */}
-      <div className="relative h-[65%] bg-gray-50 flex items-center justify-center">
-        <div className="absolute top-4 left-4 flex gap-2 z-10">
-          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/90 border border-gray-300">
+      <div className="relative aspect-square sm:h-[60%] bg-[#F7F5EF]/50 flex items-center justify-center overflow-hidden p-6 sm:p-10 shrink-0">
+        {/* BADGES */}
+        <div className="absolute top-3 left-3 sm:top-5 left-5 flex flex-col gap-1.5 sm:gap-2 z-20">
+          <span className="bg-white/90 backdrop-blur px-2 sm:px-3 py-1 rounded-full text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-slate-900 border border-stone-200 shadow-sm">
             {product.weight}
           </span>
           {product.rating >= 4.6 && (
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-700 text-white">
+            <span className="bg-[#D9A441] text-white px-2 sm:px-3 py-1 rounded-full text-[8px] sm:text-[10px] font-black uppercase tracking-widest shadow-lg shadow-amber-500/20">
               Bestseller
             </span>
           )}
         </div>
+
+        {/* ACTIONS OVERLAY */}
+        <div className="absolute top-3 right-3 sm:top-5 right-5 flex flex-col gap-1.5 sm:gap-2 z-20 sm:translate-x-12 sm:opacity-0 sm:group-hover:translate-x-0 sm:group-hover:opacity-100 transition-all duration-500 ease-out">
+          <button
+            onClick={() => setFav(!fav)}
+            className={`p-2 sm:p-3 rounded-full shadow-xl transition-all duration-300 active:scale-90 ${fav ? 'bg-red-500 text-white' : 'bg-white text-slate-400 hover:text-red-500'}`}
+            aria-label="Add to favorites"
+          >
+            <Heart size={18} fill={fav ? "currentColor" : "none"} className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+          </button>
+          <button
+            onClick={() => {
+              setActiveImage(0);
+              setOpen(true);
+            }}
+            className="p-2 sm:p-3 bg-white text-slate-400 hover:text-[#1F6F43] rounded-full shadow-xl transition-all duration-300 active:scale-90"
+            aria-label="Quick view"
+          >
+            <Eye size={18} className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+          </button>
+        </div>
+
+        {/* MAIN IMAGE */}
         <img
           src={images[activeImage]}
           alt={product.name}
-          className="
-            max-h-[85%]
-            object-contain
-            transition-transform duration-500
-            group-hover:scale-105
-          "
-          onClick={() => setOpen(true)}
-          onError={() => setActiveImage(0)}
+          className="max-h-full max-w-full object-contain transition-all duration-700 ease-in-out sm:group-hover:scale-110 sm:group-hover:rotate-2 drop-shadow-xl"
+          loading="lazy"
         />
 
-        {/* IMAGE HOVER ZONES */}
+        {/* HOVER ZONES - HIDDEN ON TOUCH DEVICES FOR BETTER UX */}
         {images.length > 1 && (
-          <div className="absolute inset-0 flex">
-            <div className="w-1/3" onMouseEnter={() => setActiveImage(0)} />
-            <div
-              className="w-1/3"
-              onMouseEnter={() => images[1] && setActiveImage(1)}
-            />
-            <div
-              className="w-1/3"
-              onMouseEnter={() => images[2] && setActiveImage(2)}
-            />
+          <div className="absolute inset-0 hidden sm:flex z-10">
+            <div className="w-1/2" onMouseEnter={() => setActiveImage(0)} />
+            <div className="w-1/2" onMouseEnter={() => images[1] && setActiveImage(1)} />
           </div>
         )}
+      </div>
 
-        {/* IMAGE DOTS */}
-        {images.length > 1 && (
-          <div className="absolute bottom-3 flex gap-2">
-            {images.map((_, i) => (
-              <span
-                key={i}
-                className={`h-2 w-2 rounded-full ${
-                  activeImage === i ? "bg-green-600" : "bg-gray-300"
-                }`}
+      {/* CONTENT AREA */}
+      <div className="flex-1 p-5 sm:p-8 flex flex-col justify-between">
+        <div>
+          <div className="flex items-center gap-1 mb-2 sm:mb-3">
+            {[...Array(5)].map((_, i) => (
+              <Star 
+                key={i} 
+                size={12} 
+                className={i < Math.floor(product.rating) ? "fill-[#D9A441] text-[#D9A441]" : "text-slate-200"} 
               />
             ))}
-          </div>
-        )}
-        <div className="absolute inset-x-0 bottom-3 px-4 hidden md:flex justify-center gap-3">
-          <button
-            className="bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow opacity-0 group-hover:opacity-100 transition"
-            onClick={() => {
-              import("../lib/cart").then((c) => {
-                c.addToCart({
-                  id: product.id,
-                  name: product.name,
-                  price: product.price,
-                  image: cardImage,
-                  qty: 1,
-                });
-                if (window.__showCartModal) window.__showCartModal();
-              });
-            }}
-          >
-            Quick Add
-          </button>
-          <button
-            onClick={() => {
-              const idx = preferredModalIndex();
-              setActiveImage(idx);
-              setFixedModalImage(images[idx]);
-              setOpen(true);
-            }}
-            className="bg-white px-4 py-2 rounded-lg text-sm font-semibold border border-gray-300 opacity-0 group-hover:opacity-100 transition"
-          >
-            View Details
-          </button>
-        </div>
-      </div>
-
-      {/* DETAILS */}
-      <div className="flex-1 p-5 flex flex-col justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">
-            {product.name}
-          </h3>
-
-          <div className="flex items-center gap-1 mb-3">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <span
-                key={i}
-                className={
-                  i < Math.round(product.rating)
-                    ? "text-yellow-400"
-                    : "text-gray-300"
-                }
-              >
-                ★
-              </span>
-            ))}
-            <span className="text-sm text-gray-500 ml-1">
-              {product.rating}
+            <span className="text-[10px] sm:text-[11px] font-black text-slate-400 ml-2 uppercase tracking-tighter">
+              {product.rating} Rating
             </span>
           </div>
+          
+          <h3 className="text-lg sm:text-xl font-black text-slate-900 leading-tight sm:group-hover:text-[#1F6F43] transition-colors mb-2 sm:mb-3">
+            {product.name}
+          </h3>
+          <p className="text-[11px] sm:text-xs font-medium text-slate-500 line-clamp-2 leading-relaxed">
+            {product.description}
+          </p>
         </div>
 
-        {/* PRICE + CTA */}
-        <div className="flex items-center justify-between">
-          <span className="text-xl font-extrabold text-green-700">
-            ₹{priceForVariant(product.price)}
-          </span>
+        <div className="flex items-center justify-between mt-6 sm:mt-8">
+          <div className="flex flex-col">
+            <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Price</span>
+            <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">₹{product.price}</span>
+          </div>
 
           <button
-            className="
-              bg-green-600 text-white
-              px-6 py-2.5 rounded-xl
-              text-sm font-semibold
-              hover:bg-green-700
-              transition
-            "
             onClick={() => {
               import("../lib/cart").then((c) => {
-                c.addToCart({
-                  id: product.id,
-                  name: product.name,
-                  price: priceForVariant(product.price),
-                  image: cardImage,
-                  qty,
-                });
+                c.addToCart({ ...product, image: cardImage, qty: 1 });
                 if (window.__showCartModal) window.__showCartModal();
               });
             }}
+            className="group/btn relative bg-[#1F6F43] text-white p-3.5 sm:p-4 rounded-xl sm:rounded-2xl hover:bg-green-800 transition-all duration-300 shadow-lg shadow-green-900/20 active:scale-95"
+            aria-label="Add to cart"
           >
-            Add to Cart
+            <ShoppingCart size={20} className="w-5 h-5 sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform" />
           </button>
         </div>
       </div>
 
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setOpen(false)} />
-          <div className="relative w-full max-w-3xl mx-4 bg-white rounded-3xl shadow-2xl border border-gray-100 ring-1 ring-black/5 overflow-hidden">
-            <div className="flex flex-col md:flex-row">
-              <div className="md:w-1/2 bg-gray-50 p-6">
-                <div className="flex gap-2 mb-3">
-                  <button
-                    onClick={() => setViewerMode("image")}
-                    className={`px-3 py-1 rounded-full text-sm border ${viewerMode==='image' ? 'bg-green-700 text-white border-green-700' : 'bg-white text-gray-700 border-gray-300'}`}
-                  >
-                    Image
-                  </button>
-                  <button
-                    onClick={() => setViewerMode("3d")}
-                    className={`px-3 py-1 rounded-full text-sm border ${viewerMode==='3d' ? 'bg-green-700 text-white border-green-700' : 'bg-white text-gray-700 border-gray-300'}`}
-                  >
-                    3D
-                  </button>
-                </div>
-                <div className="flex items-center justify-center">
-                  {viewerMode === "3d" ? (
-                    <ProductThreeView imageUrl={fixedModalImage || images[activeImage]} />
-                  ) : (
-                    <img src={fixedModalImage || images[activeImage]} alt={product.name} className="max-h-72 object-contain" />
-                  )}
-                </div>
-              </div>
-              <div className="md:w-1/2 p-6">
-                <div className="flex justify-end">
-                  <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-gray-800">✕</button>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900">{product.name}</h3>
-                <p className="text-sm text-gray-600 mt-1">{product.description}</p>
-                <div className="mt-4 flex items-center gap-2">
-                  <span className="text-amber-500">★★★★★</span>
-                  <span className="text-sm text-gray-600">{product.rating}/5</span>
-                </div>
+      {/* MODERN MODAL - ESCAPING STACKING CONTEXT */}
+      {open && createPortal(
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-12 overflow-hidden">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xl transition-opacity" onClick={() => setOpen(false)} />
+          
+          <div className="relative w-full max-w-4xl bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] md:max-h-[85vh] animate-reveal">
+            {/* CLOSE */}
+            <button 
+              onClick={() => setOpen(false)}
+              className="absolute top-4 right-4 md:top-6 md:right-6 z-50 p-2.5 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors text-slate-600"
+            >
+              <X size={18} />
+            </button>
 
-                <div className="mt-6">
-                  <label className="text-sm text-gray-700">Select Weight</label>
-                  <div className="mt-2 flex gap-3">
-                    {variantOptions.map((opt) => (
-                      <button
-                        key={opt}
-                        onClick={() => setVariant(opt)}
-                        className={`px-4 py-2 rounded-xl border text-sm font-semibold ${
-                          variant === opt ? "bg-green-700 text-white border-green-700" : "bg-white text-gray-700 border-gray-300"
-                        }`}
-                      >
-                        {opt}
-                      </button>
+            {/* LEFT: VISUAL */}
+            <div className="h-[35vh] md:h-auto md:w-[45%] bg-slate-50/50 p-6 md:p-10 flex flex-col">
+              <div className="flex gap-2 mb-4 md:mb-6">
+                {["image", "3d"].map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => setViewerMode(mode)}
+                    className={`px-3 md:px-4 py-1.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all ${viewerMode === mode ? 'bg-green-900 text-white shadow-lg shadow-green-900/20' : 'bg-white text-slate-400 border border-slate-200 hover:border-slate-300'}`}
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex-1 flex items-center justify-center relative min-h-0">
+                <div className="absolute inset-0 bg-green-200/20 blur-[50px] md:blur-[80px] rounded-full" />
+                {viewerMode === "3d" ? (
+                  <ProductThreeView imageUrl={cardImage} />
+                ) : (
+                  <img src={cardImage} alt={product.name} className="relative z-10 max-h-full object-contain drop-shadow-2xl animate-float" />
+                )}
+              </div>
+
+              {/* THUMBS */}
+              <div className="flex gap-2 md:gap-3 mt-4 md:mt-6 justify-center">
+                {images.map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveImage(i)}
+                    className={`w-12 h-12 md:w-16 md:h-16 rounded-xl p-1.5 border-2 transition-all ${activeImage === i ? 'border-green-600 bg-white shadow-md' : 'border-transparent hover:border-slate-200'}`}
+                  >
+                    <img src={img} className="w-full h-full object-contain" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* RIGHT: DETAILS */}
+            <div className="flex-1 p-6 md:p-12 overflow-y-auto scrollbar-hide">
+              <div className="mb-6 md:mb-8">
+                <img src="/images/hero/LogoV1.png" className="h-8 md:h-12 mb-6" />
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="flex gap-0.5">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} size={12} className={i < Math.floor(product.rating) ? "fill-orange-400 text-orange-400" : "text-slate-200"} />
                     ))}
                   </div>
+                  <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">{product.rating} • Verified</span>
                 </div>
+                <h2 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tighter leading-tight mb-3">
+                  {product.name}
+                </h2>
+                <div className="text-xl md:text-2xl font-black text-green-900 mb-4 md:mb-6">₹{product.price}</div>
+                <p className="text-slate-500 font-medium leading-relaxed text-sm md:text-base mb-6">
+                  {product.description}
+                </p>
+              </div>
 
-                <div className="mt-4">
-                  <label className="text-sm text-gray-700">Quantity</label>
-                  <div className="mt-2 flex items-center gap-3">
-                    <button onClick={() => setQty(Math.max(1, qty - 1))} className="px-3 py-1 border rounded">−</button>
-                    <span>{qty}</span>
-                    <button onClick={() => setQty(qty + 1)} className="px-3 py-1 border rounded">+</button>
-                  </div>
-                </div>
-
-                <div className="mt-6 flex items-center justify-between">
-                  <div>
-                    <div className="text-xs text-gray-500">Price</div>
-                    <div className="text-2xl font-bold text-green-700">₹{priceForVariant(product.price)}</div>
+              <div className="space-y-4 md:space-y-6 pt-6 border-t border-slate-100">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <div className="flex items-center bg-slate-100 rounded-2xl p-1.5 justify-center">
+                    <button onClick={() => setQty(Math.max(1, qty-1))} className="p-2 hover:bg-white rounded-xl transition-all"><Minus size={16} /></button>
+                    <span className="w-10 text-center text-sm font-black text-slate-900">{qty}</span>
+                    <button onClick={() => setQty(qty+1)} className="p-2 hover:bg-white rounded-xl transition-all"><Plus size={16} /></button>
                   </div>
                   <button
-                    className="btn-primary w-auto"
                     onClick={() => {
                       import("../lib/cart").then((c) => {
-                        c.addToCart({
-                          id: product.id,
-                          name: product.name + ` (${variant})`,
-                          price: priceForVariant(product.price),
-                          image: cardImage,
-                          qty,
-                        });
-                        setOpen(false);
+                        c.addToCart({ ...product, image: cardImage, qty });
                         if (window.__showCartModal) window.__showCartModal();
+                        setOpen(false);
                       });
                     }}
+                    className="flex-1 btn-premium-primary py-3.5 md:py-4 text-sm"
                   >
                     Add to Cart
                   </button>
                 </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <Truck size={16} className="text-green-700" />
+                    <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">Free Delivery</span>
+                  </div>
+                  <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <ShieldCheck size={16} className="text-green-700" />
+                    <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">Certified Pure</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

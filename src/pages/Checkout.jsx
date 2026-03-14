@@ -2,8 +2,26 @@ import { useEffect, useState } from "react";
 import { getCart, subtotal, clearAllCarts } from "../lib/cart";
 import { useAuth } from "../lib/auth.jsx";
 import { supabase } from "../lib/supabase";
-import { Pencil } from "lucide-react";
-
+import { 
+  Pencil, 
+  ShieldCheck, 
+  Truck, 
+  CreditCard, 
+  Banknote, 
+  CheckCircle2, 
+  ArrowLeft, 
+  User, 
+  Phone, 
+  Mail, 
+  MapPin, 
+  Building2, 
+  Hash, 
+  Navigation, 
+  MessageSquare,
+  Award,
+  FlaskConical,
+  Leaf
+} from "lucide-react";
 
 export default function Checkout() {
   const { user, loginGuest } = useAuth();
@@ -17,7 +35,6 @@ export default function Checkout() {
   const [saveError, setSaveError] = useState("");
   const [guestFlow, setGuestFlow] = useState(false);
 
-
   const [form, setForm] = useState({
     name: "",
     mobile: "",
@@ -28,6 +45,12 @@ export default function Checkout() {
     landmark: "",
     notes: "",
   });
+
+  const shippingThreshold = 499;
+  const subTotal = subtotal();
+  const isFreeShipping = subTotal >= shippingThreshold;
+  const shippingCost = isFreeShipping ? 0 : 80;
+  const finalTotal = Math.max(subTotal - discount + shippingCost, 0);
 
   useEffect(() => {
     const savedForm = localStorage.getItem("checkoutForm");
@@ -207,9 +230,6 @@ export default function Checkout() {
     localStorage.setItem("checkoutCoupon", coupon);
   }, [coupon]);
 
-  const subTotal = subtotal();
-  const finalTotal = Math.max(subTotal - discount, 0);
-
   const applyCoupon = () => {
     const match = coupon.match(/\d+/);
     if (!match) return setDiscount(0);
@@ -247,17 +267,6 @@ export default function Checkout() {
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
-
-  const orderData = {
-  id: "ORD" + Date.now(),
-  total: finalTotal,
-  payment: paymentMethod === "COD" ? "Cash on Delivery" : "Online",
-  address: `${form.address}, ${form.city} - ${form.pincode}`,
-  status: 1 // 0=confirmed, 1=packed, etc.
-};
-
-localStorage.setItem("lastOrder", JSON.stringify(orderData));
-
 
 const saveCustomerAndAddress = async () => {
   try {
@@ -399,8 +408,8 @@ const placeOrder = async () => {
   const couponDiscountRupees = Math.round((itemsSubtotalRupees * couponPct) / 100);
   const itemDiscountRupees = 0;
   const taxTotalRupees = 0;
-  const shippingRupees = 0;
-  const grandTotalRupees = Math.max(itemsSubtotalRupees - itemDiscountRupees - couponDiscountRupees + taxTotalRupees + shippingRupees, 0);
+  const shippingRupees = isFreeShipping ? 0 : 80;
+    const grandTotalRupees = Math.max(itemsSubtotalRupees - itemDiscountRupees - couponDiscountRupees + taxTotalRupees + shippingRupees, 0);
 
   let orderRow = null;
   try {
@@ -504,221 +513,287 @@ const placeOrder = async () => {
   }
 };
 
-  return (
-    <section className="min-h-screen py-14 px-6 bg-[#f6fbf6]">
-      <h1 className="text-center text-4xl font-extrabold text-green-800 mb-10">
-        Secure Checkout
-      </h1>
-
-      <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8">
-        {/* DELIVERY */}
-        <div className="bg-white rounded-2xl shadow-md p-8">
-          {saveError && (
-            <div className="mb-4 text-sm text-red-600">
-              {saveError}
-            </div>
-          )}
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold">
-              Delivery Details
-            </h2>
-            <button
-              onClick={async () => {
-                if (readonly) {
-                  setReadonly(false);
-                } else {
-                  if (!validateAndSetErrors()) return;
-                  await saveCustomerAndAddress();
-                  setReadonly(true);
-                }
-              }}
-              className="flex items-center gap-2 text-sm font-semibold px-3 py-1.5 rounded-lg border border-gray-300 hover:border-green-700 hover:text-green-700"
-            >
-              <Pencil size={16} />
-              {readonly ? "Edit" : "Save"}
-            </button>
+  const InputField = ({ icon: Icon, label, name, placeholder, value, onChange, disabled, error, type = "text", as = "input" }) => {
+    const Component = as;
+    return (
+      <div className="flex flex-col gap-1">
+        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">{label}</label>
+        <div className="relative group">
+          <div className={`absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors duration-300 ${error ? 'text-red-400' : 'text-slate-400 group-focus-within:text-[#1F6F43]'}`}>
+            <Icon size={16} />
           </div>
-
-          <div className="grid sm:grid-cols-2 gap-4">
-            <input className={`input ${errors.name ? "border-red-500" : ""}`} placeholder="Full Name"
-              value={form.name}
-              onChange={e => setForm({ ...form, name: e.target.value })}
-              disabled={readonly}
-            />
-            <input className={`input ${errors.mobile ? "border-red-500" : ""}`} placeholder="Mobile Number"
-              value={form.mobile}
-              onChange={e => {
-                const val = e.target.value.replace(/\D/g, "").slice(0, 10);
-                setForm({ ...form, mobile: val });
-              }}
-              disabled={readonly}
-            />
-          </div>
-          <div className="grid sm:grid-cols-2 gap-4 mt-1 text-xs text-red-600">
-            <span>{errors.name || ""}</span>
-            <span>{errors.mobile || ""}</span>
-          </div>
-
-          <input className={`input mt-4 ${errors.email ? "border-red-500" : ""}`} placeholder="Email *"
-            value={form.email}
-            onChange={e => setForm({ ...form, email: e.target.value })}
-            disabled={readonly}
+          <Component
+            type={type}
+            placeholder={placeholder}
+            value={value}
+            onChange={onChange}
+            disabled={disabled}
+            className={`w-full bg-slate-50/50 border-2 rounded-xl px-10 py-2.5 text-xs font-bold text-slate-900 transition-all duration-300 focus:outline-none focus:bg-white
+              ${error ? 'border-red-100 focus:border-red-300' : 'border-slate-100 focus:border-[#1F6F43] focus:ring-4 focus:ring-green-500/5'}
+              ${disabled ? 'opacity-60 cursor-not-allowed bg-slate-100' : ''}
+              ${as === 'textarea' ? 'h-24 pt-3 items-start' : ''}
+            `}
           />
-          <div className="text-xs text-red-600 mt-1">{errors.email || ""}</div>
-
-          <textarea className={`input mt-4 h-24 resize-none ${errors.address ? "border-red-500" : ""}`}
-            placeholder="Full Address"
-            value={form.address}
-            onChange={e => setForm({ ...form, address: e.target.value })}
-            disabled={readonly}
-          />
-          <div className="text-xs text-red-600 mt-1">{errors.address || ""}</div>
-
-          <div className="grid sm:grid-cols-2 gap-4 mt-4">
-            <input className={`input ${errors.city ? "border-red-500" : ""}`} placeholder="City"
-              value={form.city}
-              onChange={e => setForm({ ...form, city: e.target.value })}
-              disabled={readonly}
-            />
-            <input className={`input ${errors.pincode ? "border-red-500" : ""}`} placeholder="Pincode"
-              value={form.pincode}
-              onChange={e => {
-                const val = e.target.value.replace(/\D/g, "").slice(0, 6);
-                setForm({ ...form, pincode: val });
-              }}
-              disabled={readonly}
-            />
-          </div>
-          <div className="grid sm:grid-cols-2 gap-4 mt-1 text-xs text-red-600">
-            <span>{errors.city || ""}</span>
-            <span>{errors.pincode || ""}</span>
-          </div>
-
-          <input className="input mt-4" placeholder="Landmark (optional)"
-            value={form.landmark}
-            onChange={e => setForm({ ...form, landmark: e.target.value })}
-            disabled={readonly}
-          />
-          <textarea className="input mt-4 h-20 resize-none" placeholder="Delivery notes (optional)"
-            value={form.notes}
-            onChange={e => setForm({ ...form, notes: e.target.value })}
-            disabled={readonly}
-          />
+          {error && <span className="absolute -bottom-4 left-1 text-[9px] font-bold text-red-500 uppercase tracking-tighter">{error}</span>}
         </div>
+      </div>
+    );
+  };
 
-        {/* SUMMARY */}
-        <div className="bg-white rounded-2xl shadow-md p-8 md:sticky md:top-20">
-          <h2 className="text-2xl font-semibold mb-6">
-            Order Summary
-          </h2>
-
-          {cart.map(item => (
-            <div key={item.id} className="flex items-center justify-between text-sm mb-3">
-              <div className="flex items-center gap-3">
-                <img src={item.image} alt={item.name} className="h-12 w-12 object-contain bg-gray-50 rounded" />
-                <span className="font-medium">{item.name} × {item.qty}</span>
-              </div>
-              <span className="font-semibold">₹{item.price * item.qty}</span>
-            </div>
-          ))}
-
-          <div className="flex gap-3 my-6">
-            <input className="input flex-1"
-              placeholder="Coupon code (WELCOME50)"
-              value={coupon}
-              onChange={e => setCoupon(e.target.value)}
-            />
-            <button
-              onClick={applyCoupon}
-              className="bg-green-700 text-white px-6 rounded-lg font-semibold"
-            >
-              Apply
-            </button>
-          </div>
-          <div className="flex gap-2 mb-4">
-            {couponPresets.map((c) => (
-              <button
-                key={c}
-                onClick={() => setCoupon(c)}
-                className="px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-300 hover:border-green-700 hover:text-green-700"
-              >
-                {c}
-              </button>
-            ))}
-          </div>
-
-          <div className="border-t pt-4 text-sm space-y-2">
-            <div className="flex justify-between">
-              <span>Subtotal</span><span>₹{subTotal}</span>
-            </div>
-            <div className="flex justify-between text-green-700">
-              <span>Discount</span><span>-₹{discount}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Total</span>
-              <span className="text-lg font-bold text-green-700">
-                ₹{finalTotal}
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <button
-              onClick={() => !guestFlow && setPaymentMethod("COD")}
-              disabled={guestFlow}
-              className={`px-4 py-3 rounded-xl font-semibold border ${
-                paymentMethod === "COD" && !guestFlow
-                  ? "bg-green-700 text-white border-green-700"
-                  : "bg-white text-gray-700 border-gray-300"
-              } ${guestFlow ? "opacity-50 cursor-not-allowed" : ""}`}
-            >
-              Cash on Delivery
-            </button>
-            <button
-              onClick={() => setPaymentMethod("ONLINE")}
-              className={`px-4 py-3 rounded-xl font-semibold border ${
-                paymentMethod === "ONLINE"
-                  ? "bg-green-700 text-white border-green-700"
-                  : "bg-white text-gray-700 border-gray-300"
-              }`}
-            >
-              Online Payment
-            </button>
-          </div>
-
-          <button
-            onClick={placeOrder}
-            disabled={!validateForm()}
-            className={`mt-6 w-full py-4 rounded-xl font-bold text-lg transition ${
-              validateForm()
-                ? "bg-green-700 text-white hover:bg-green-800"
-                : "bg-gray-300 text-gray-600 cursor-not-allowed"
-            }`}
-          >
-            {paymentMethod === "COD" ? "Place Order" : "Pay & Place Order"}
-          </button>
-          <div className="mt-3 flex items-center justify-center gap-4 text-xs text-gray-500">
-            <span>✔ UPI</span>
-            <span>✔ Cards</span>
-            <span>✔ COD</span>
-          </div>
+  return (
+    <section className="min-h-screen bg-[#F7F5EF] pt-20 pb-16">
+      {/* BREADCRUMBS / STEPPER */}
+      <div className="max-w-7xl mx-auto px-6 mb-6 flex justify-center">
+        <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-widest text-slate-400">
+          <span className="text-green-800">01. Cart</span>
+          <ArrowLeft size={12} className="rotate-180 text-slate-300" />
+          <span className="text-green-800 border-b-2 border-green-800 pb-0.5">02. Checkout</span>
+          <ArrowLeft size={12} className="rotate-180 text-slate-300" />
+          <span>03. Success</span>
         </div>
       </div>
 
-      <style>{`
-        .input {
-          width: 100%;
-          padding: 14px;
-          border-radius: 10px;
-          border: 1px solid #e5e7eb;
-          font-size: 14px;
-        }
-        .input:focus {
-          border-color: #15803d;
-          outline: none;
-          box-shadow: 0 0 0 2px rgba(21,128,61,.15);
-        }
-      `}</style>
+      <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-12 gap-8 items-start">
+        
+        {/* LEFT: DELIVERY & DETAILS */}
+        <div className="lg:col-span-7 space-y-6">
+          <div className="reveal">
+            <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter leading-none mb-2">
+              Secure Checkout
+            </h1>
+            <p className="text-xs text-slate-500 font-medium tracking-tight">Provide your delivery info to complete the order.</p>
+          </div>
+
+          <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/40 p-6 md:p-8 border border-white relative overflow-hidden">
+            {/* AMBIENT GLOW */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-green-50/40 blur-[80px] rounded-full pointer-events-none" />
+            
+            <div className="relative z-10">
+              {saveError && (
+                <div className="mb-6 p-3 bg-red-50 border border-red-100 rounded-xl text-red-600 text-[10px] font-bold flex items-center gap-2">
+                  <CheckCircle2 size={14} className="rotate-180" />
+                  {saveError}
+                </div>
+              )}
+
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center text-[#1F6F43]">
+                    <MapPin size={20} />
+                  </div>
+                  <h2 className="text-xl font-black text-slate-900 tracking-tight">Delivery Address</h2>
+                </div>
+                <button
+                  onClick={async () => {
+                    if (readonly) setReadonly(false);
+                    else {
+                      if (!validateAndSetErrors()) return;
+                      await saveCustomerAndAddress();
+                      setReadonly(true);
+                    }
+                  }}
+                  className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg bg-slate-50 text-slate-500 hover:bg-[#1F6F43] hover:text-white transition-all duration-300"
+                >
+                  <Pencil size={12} />
+                  {readonly ? "Edit" : "Save"}
+                </button>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-x-6 gap-y-5">
+                <InputField 
+                  icon={User} label="Full Name" name="name" placeholder="Enter your name" 
+                  value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} 
+                  disabled={readonly} error={errors.name}
+                />
+                <InputField 
+                  icon={Phone} label="Mobile Number" name="mobile" placeholder="10-digit number" 
+                  value={form.mobile} onChange={e => setForm({ ...form, mobile: e.target.value.replace(/\D/g, "").slice(0, 10) })} 
+                  disabled={readonly} error={errors.mobile}
+                />
+                <div className="md:col-span-2">
+                  <InputField 
+                    icon={Mail} label="Email Address" name="email" placeholder="you@example.com" 
+                    value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} 
+                    disabled={readonly} error={errors.email}
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <InputField 
+                    as="textarea" icon={Building2} label="Complete Address" name="address" placeholder="House/Flat No., Street, Area" 
+                    value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} 
+                    disabled={readonly} error={errors.address}
+                  />
+                </div>
+                <InputField 
+                  icon={Navigation} label="City" name="city" placeholder="e.g. Kolhapur" 
+                  value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} 
+                  disabled={readonly} error={errors.city}
+                />
+                <InputField 
+                  icon={Hash} label="Pincode" name="pincode" placeholder="6-digit code" 
+                  value={form.pincode} onChange={e => setForm({ ...form, pincode: e.target.value.replace(/\D/g, "").slice(0, 6) })} 
+                  disabled={readonly} error={errors.pincode}
+                />
+                <InputField 
+                  icon={CheckCircle2} label="Landmark" name="landmark" placeholder="Near school, temple, etc." 
+                  value={form.landmark} onChange={e => setForm({ ...form, landmark: e.target.value })} 
+                  disabled={readonly}
+                />
+                <InputField 
+                  icon={MessageSquare} label="Delivery Notes" name="notes" placeholder="Special instructions" 
+                  value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} 
+                  disabled={readonly}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT: SUMMARY & PAYMENT */}
+        <div className="lg:col-span-5 space-y-6 sticky top-24">
+          <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-white overflow-hidden">
+            <div className="p-6 md:p-8">
+              <h2 className="text-xl font-black text-slate-900 tracking-tight mb-6">Order Summary</h2>
+              
+              <div className="space-y-4 max-h-[25vh] overflow-y-auto scrollbar-hide mb-6 pr-1">
+                {cart.map(item => (
+                  <div key={item.id} className="flex items-center gap-3 group">
+                    <div className="h-14 w-14 flex-shrink-0 bg-slate-50 rounded-xl p-2.5 border border-slate-100 group-hover:border-green-100 transition-colors">
+                      <img src={item.image} alt={item.name} className="h-full w-full object-contain drop-shadow-sm" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-black text-slate-900 text-xs tracking-tight leading-tight">{item.name}</p>
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Qty: {item.qty} • ₹{item.price}</p>
+                    </div>
+                    <p className="font-black text-slate-900 text-sm">₹{item.price * item.qty}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* COUPON */}
+              <div className="space-y-3 mb-6">
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <input 
+                      placeholder="Coupon Code"
+                      value={coupon}
+                      onChange={e => setCoupon(e.target.value)}
+                      className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-5 py-2.5 text-xs font-bold focus:outline-none focus:border-[#1F6F43] focus:bg-white transition-all"
+                    />
+                  </div>
+                  <button 
+                    onClick={applyCoupon}
+                    className="bg-slate-900 text-white px-6 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-colors"
+                  >
+                    Apply
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {couponPresets.map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => setCoupon(c)}
+                      className="px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border-2 border-slate-100 text-slate-400 hover:border-[#D9A441] hover:text-[#D9A441] transition-all"
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* TOTALS */}
+              <div className="bg-slate-50/50 rounded-[2rem] p-5 border border-slate-100 space-y-3">
+                <div className="flex justify-between text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                  <span>Subtotal</span>
+                  <span className="text-slate-900">₹{subTotal}</span>
+                </div>
+                <div className="flex justify-between text-[10px] font-black text-green-700 uppercase tracking-widest">
+                  <span>Coupon Discount</span>
+                  <span>-₹{discount}</span>
+                </div>
+                <div className="flex justify-between text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                  <span>Shipping Fee</span>
+                  <span className={`font-black ${isFreeShipping ? 'text-green-700' : 'text-slate-900'}`}>
+                    {isFreeShipping ? "FREE" : `₹${shippingCost}`}
+                  </span>
+                </div>
+                <div className="pt-4 mt-1 border-t border-slate-200 flex justify-between items-center">
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Final Amount</span>
+                    <span className="text-[10px] font-bold text-slate-500">(Incl. GST)</span>
+                  </div>
+                  <span className="text-2xl font-black text-[#1F6F43] tracking-tighter">₹{finalTotal}</span>
+                </div>
+              </div>
+
+              {/* PAYMENT METHODS */}
+              <div className="mt-8 space-y-3">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Payment Method</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => !guestFlow && setPaymentMethod("COD")}
+                    disabled={guestFlow}
+                    className={`group relative flex flex-col items-center gap-2 p-4 rounded-[1.5rem] border-2 transition-all duration-300 ${
+                      paymentMethod === "COD" && !guestFlow
+                        ? "border-[#1F6F43] bg-green-50/30"
+                        : "border-slate-100 hover:border-slate-200"
+                    } ${guestFlow ? "opacity-40 grayscale cursor-not-allowed" : ""}`}
+                  >
+                    <Banknote size={20} className={paymentMethod === "COD" ? "text-[#1F6F43]" : "text-slate-400"} />
+                    <span className={`text-[10px] font-black uppercase tracking-widest ${paymentMethod === "COD" ? "text-slate-900" : "text-slate-400"}`}>COD</span>
+                    {paymentMethod === "COD" && <div className="absolute top-3 right-3 text-[#1F6F43]"><CheckCircle2 size={14} /></div>}
+                  </button>
+                  <button
+                    onClick={() => setPaymentMethod("ONLINE")}
+                    className={`group relative flex flex-col items-center gap-2 p-4 rounded-[1.5rem] border-2 transition-all duration-300 ${
+                      paymentMethod === "ONLINE"
+                        ? "border-[#1F6F43] bg-green-50/30"
+                        : "border-slate-100 hover:border-slate-200"
+                    }`}
+                  >
+                    <CreditCard size={20} className={paymentMethod === "ONLINE" ? "text-[#1F6F43]" : "text-slate-400"} />
+                    <span className={`text-[10px] font-black uppercase tracking-widest ${paymentMethod === "ONLINE" ? "text-slate-900" : "text-slate-400"}`}>Online</span>
+                    {paymentMethod === "ONLINE" && <div className="absolute top-3 right-3 text-[#1F6F43]"><CheckCircle2 size={14} /></div>}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                onClick={placeOrder}
+                disabled={!validateForm()}
+                className="w-full mt-8 btn-premium-primary py-4 text-sm shadow-xl shadow-green-900/20 disabled:bg-slate-200 disabled:shadow-none"
+              >
+                {paymentMethod === "COD" ? "Confirm Order" : "Pay & Place Order"}
+              </button>
+              
+              <div className="mt-6 pt-6 border-t border-slate-100 flex flex-wrap justify-center gap-5">
+                {[
+                  { icon: ShieldCheck, text: "SSL Secure" },
+                  { icon: Truck, text: "Fast Delivery" },
+                  { icon: Leaf, text: "100% Organic" }
+                ].map((badge, i) => (
+                  <div key={i} className="flex items-center gap-1.5 text-[8px] font-black text-slate-400 uppercase tracking-widest">
+                    <badge.icon size={12} className="text-green-600" />
+                    {badge.text}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* EXTRA TRUST STRIP */}
+          <div className="bg-[#1F6F43] rounded-[1.5rem] p-4 text-white flex items-center justify-between shadow-xl shadow-green-900/20">
+            <div className="flex items-center gap-2.5">
+              <Award size={20} className="text-[#D9A441]" />
+              <div>
+                <p className="text-[8px] font-black uppercase tracking-widest opacity-80">FSSAI Certified</p>
+                <p className="text-[10px] font-bold">No. 21524172000570</p>
+              </div>
+            </div>
+            <FlaskConical size={20} className="opacity-20" />
+          </div>
+        </div>
+      </div>
     </section>
   );
 }

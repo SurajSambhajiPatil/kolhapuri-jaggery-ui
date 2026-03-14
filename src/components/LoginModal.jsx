@@ -1,5 +1,4 @@
 import { X, Mail, Lock } from "lucide-react";
-
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../lib/auth.jsx";
@@ -25,6 +24,7 @@ export default function LoginModal({ visible, onClose }) {
   const [otpStatus, setOtpStatus] = useState("");
   const [otpCooldown, setOtpCooldown] = useState(0);
   const otpTimerRef = useRef(null);
+
   useEffect(() => {
     const untilStr = localStorage.getItem("otpCooldownUntil") || "";
     const until = parseInt(untilStr, 10);
@@ -46,6 +46,7 @@ export default function LoginModal({ visible, onClose }) {
       }
     };
   }, []);
+
   const startOtpCooldown = (sec) => {
     setOtpCooldown(sec);
     localStorage.setItem("otpCooldownUntil", String(Date.now() + sec * 1000));
@@ -72,8 +73,6 @@ export default function LoginModal({ visible, onClose }) {
 
   if (!visible) return null;
 
-
-  // Email/password login handler
   const handleEmailLogin = async () => {
     setError("");
     if (!email || !password) {
@@ -92,129 +91,149 @@ export default function LoginModal({ visible, onClose }) {
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center">
-      <div className="modal-overlay" onClick={onClose} />
-      <div className="relative w-full max-w-5xl mx-4 rounded-3xl bg-white shadow-2xl overflow-hidden border border-gray-100">
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xl transition-opacity" onClick={onClose} />
+      <div className="relative w-full max-w-5xl mx-4 rounded-[3rem] bg-white shadow-2xl overflow-hidden border border-slate-100 flex flex-col md:flex-row max-h-[90vh]">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-600 hover:text-black"
+          className="absolute top-8 right-8 z-50 p-3 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors text-slate-600"
         >
-          <X size={18} />
+          <X size={20} />
         </button>
-        <div className="grid grid-cols-1 md:grid-cols-2">
-          <div className="relative hidden md:block">
+
+        <div className="md:w-1/2 relative hidden md:block">
+          <img
+            src="/images/hero/Gudora-Food-BG.png"
+            alt="Gudora Foods"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-green-950/20" />
+        </div>
+
+        <div className="md:w-1/2 p-8 md:p-12 overflow-y-auto">
+          <div className="flex flex-col items-center mb-10">
             <img
-              src="/images/hero/Gudora-Food-BG.png"
-              alt="Gudora Foods"
-              className="w-full h-full object-cover"
+              src="/images/hero/LogoV1.png"
+              alt="Gudora"
+              className="h-20 mb-4"
             />
-          </div>
-          <div className="p-8">
-            <div className="flex items-center justify-center mb-6">
-              <img
-                src="/images/hero/GudoraFoods-FinalLogo.png"
-                alt="Gudora"
-                className="h-16"
-              />
+            <div className="flex flex-col items-center text-center">
+              <span className="text-3xl font-black text-green-950 tracking-tighter leading-none">
+                GUDORA
+              </span>
+              <span className="text-[14px] font-bold text-green-700 tracking-[0.3em] uppercase mt-1">
+                Foods
+              </span>
             </div>
-            {!showRegister ? (
-              <>
-                <h3 className="text-2xl font-bold text-gray-900 text-center">Welcome Back</h3>
-                <p className="text-sm text-gray-500 text-center mt-1">Login to continue shopping healthy</p>
-                {authType === "password" ? (
-                  <div className="mt-6">
-                    <div className="relative">
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Enter Email"
-                        className="w-full pl-10 pr-4 py-3 mb-3 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
-                        autoComplete="username"
-                      />
-                      <Mail size={16} className="absolute left-3 top-3.5 text-gray-500" />
-                    </div>
-                    <div className="relative">
-                      <input
-                        type={showPass ? "text" : "password"}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Enter Password"
-                        className="w-full pl-10 pr-12 py-3 mb-3 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
-                        autoComplete="current-password"
-                      />
-                      <Lock size={16} className="absolute left-3 top-3.5 text-gray-500" />
-                      <button
-                        className="absolute right-3 top-2.5 text-xs font-semibold text-gray-600 hover:text-gray-900"
-                        onClick={() => setShowPass((v) => !v)}
-                      >
-                        {showPass ? "Hide" : "Show"}
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="flex items-center gap-2 text-sm text-gray-600">
-                        <input
-                          type="checkbox"
-                          checked={remember}
-                          onChange={(e) => setRemember(e.target.checked)}
-                          className="rounded"
-                        />
-                        Remember Me
-                      </label>
-                      <button
-                        onClick={async () => {
-                          setError("");
-                          const ok = /^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(email);
-                          if (!ok) { setError("Please enter a valid email"); return; }
-                          setLoading(true);
-                          const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                            redirectTo: window.location.origin + "/reset"
-                          });
-                          if (error) setError(error.message);
-                          else setOtpStatus("Password reset link sent. Check your email.");
-                          setLoading(false);
-                        }}
-                        className="text-amber-600 hover:text-amber-700 text-sm"
-                        disabled={loading}
-                      >
-                        Forgot Password?
-                      </button>
-                    </div>
-                    {error && <div className="text-red-600 text-xs mb-2 text-center">{error}</div>}
-                    {otpStatus && <div className="text-green-700 text-xs mb-2 text-center">{otpStatus}</div>}
+          </div>
+
+          {!showRegister ? (
+            <>
+              <div className="text-center mb-10">
+                <h3 className="text-3xl font-black text-slate-900 tracking-tight">Welcome Back</h3>
+                <p className="text-sm text-slate-500 mt-2 font-medium">Login to continue your healthy journey</p>
+              </div>
+
+              {authType === "password" ? (
+                <div className="space-y-4">
+                  <div className="relative group">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Email Address"
+                      className="input-modern pl-12"
+                      autoComplete="username"
+                    />
+                    <Mail size={18} className="absolute left-4 top-4 text-slate-400 group-focus-within:text-green-600 transition-colors" />
+                  </div>
+                  <div className="relative group">
+                    <input
+                      type={showPass ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Password"
+                      className="input-modern pl-12 pr-12"
+                      autoComplete="current-password"
+                    />
+                    <Lock size={18} className="absolute left-4 top-4 text-slate-400 group-focus-within:text-green-600 transition-colors" />
                     <button
-                      onClick={handleEmailLogin}
-                      className="w-full bg-amber-500 hover:bg-amber-600 text-white px-5 py-3 text-sm font-semibold rounded-xl"
+                      className="absolute right-4 top-4 text-xs font-black text-slate-400 hover:text-slate-900 uppercase tracking-widest"
+                      onClick={() => setShowPass((v) => !v)}
+                    >
+                      {showPass ? "Hide" : "Show"}
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-between py-2">
+                    <label className="flex items-center gap-2 text-sm text-slate-600 font-medium cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={remember}
+                        onChange={(e) => setRemember(e.target.checked)}
+                        className="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-green-600/20"
+                      />
+                      Remember Me
+                    </label>
+                    <button
+                      onClick={async () => {
+                        setError("");
+                        const ok = /^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(email);
+                        if (!ok) { setError("Please enter a valid email"); return; }
+                        setLoading(true);
+                        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                          redirectTo: window.location.origin + "/reset"
+                        });
+                        if (error) setError(error.message);
+                        else setOtpStatus("Reset link sent! Please check your email.");
+                        setLoading(false);
+                      }}
+                      className="text-green-700 hover:text-green-800 text-sm font-bold"
                       disabled={loading}
                     >
-                      {loading ? "Logging in..." : "Login"}
+                      Forgot Password?
+                    </button>
+                  </div>
+                  {error && <div className="bg-red-50 text-red-600 text-xs p-3 rounded-xl border border-red-100 text-center font-bold">{error}</div>}
+                  {otpStatus && <div className="bg-green-50 text-green-700 text-xs p-3 rounded-xl border border-green-100 text-center font-bold">{otpStatus}</div>}
+                  
+                  <div className="space-y-3 pt-2">
+                    <button
+                      onClick={handleEmailLogin}
+                      className="w-full btn-modern-primary py-4 text-base shadow-xl shadow-green-900/20"
+                      disabled={loading}
+                    >
+                      {loading ? "Verifying..." : "Login to Account"}
                     </button>
                     <button
                       onClick={() => { setAuthType("otp"); setError(""); setOtpStatus(""); }}
-                      className="w-full mt-3 border border-amber-300 text-amber-700 px-5 py-3 text-sm font-semibold rounded-xl bg-white hover:bg-amber-50"
+                      className="w-full btn-modern-secondary py-4 text-base"
                       disabled={loading}
                     >
                       Login with OTP
                     </button>
-                    <p className="text-sm text-gray-600 text-center mt-6">
-                      Don’t have an account?{" "}
-                      <button className="text-amber-700 font-semibold" onClick={() => setShowRegister(true)}>Sign Up</button>
-                    </p>
                   </div>
-                ) : (
-                  <div className="mt-6">
-                    <div className="relative">
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Enter Email"
-                        className="w-full pl-10 pr-4 py-3 mb-3 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
-                        autoComplete="username"
-                      />
-                      <Mail size={16} className="absolute left-3 top-3.5 text-gray-500" />
-                    </div>
-                    {error && <div className="text-red-600 text-xs mb-2 text-center">{error}</div>}
-                    {otpStatus && <div className="text-green-700 text-xs mb-2 text-center">{otpStatus}</div>}
+
+                  <p className="text-sm text-slate-500 text-center mt-10 font-medium">
+                    New to Gudora?{" "}
+                    <button className="text-green-800 font-black hover:underline underline-offset-4" onClick={() => setShowRegister(true)}>Create Account</button>
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="relative group">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Email Address"
+                      className="input-modern pl-12"
+                      autoComplete="username"
+                    />
+                    <Mail size={18} className="absolute left-4 top-4 text-slate-400 group-focus-within:text-green-600 transition-colors" />
+                  </div>
+                  {error && <div className="bg-red-50 text-red-600 text-xs p-3 rounded-xl border border-red-100 text-center font-bold">{error}</div>}
+                  {otpStatus && <div className="bg-green-50 text-green-700 text-xs p-3 rounded-xl border border-green-100 text-center font-bold">{otpStatus}</div>}
+                  
+                  <div className="space-y-3">
                     <button
                       onClick={async () => {
                         setError(""); setOtpStatus("");
@@ -231,128 +250,124 @@ export default function LoginModal({ visible, onClose }) {
                         if (error) {
                           const msg = (error.message || "").toLowerCase();
                           if (msg.includes("rate limit")) {
-                            setError("Too many email requests. Please wait before trying again.");
+                            setError("Too many requests. Please wait.");
                             startOtpCooldown(900);
                           } else {
                             setError(error.message);
                           }
                         } else {
-                          setOtpStatus("Login link sent. Check your email.");
+                          setOtpStatus("Magic link sent! Check your email.");
                           startOtpCooldown(900);
                         }
                         setLoading(false);
                       }}
-                      className="w-full bg-amber-500 hover:bg-amber-600 text-white px-5 py-3 text-sm font-semibold rounded-xl"
+                      className="w-full btn-modern-primary py-4 text-base"
                       disabled={loading || otpCooldown > 0}
                     >
                       {loading ? "Sending..." : otpCooldown > 0 ? `Retry in ${otpCooldown}s` : "Send Login Link"}
                     </button>
                     <button
                       onClick={() => { setAuthType("password"); setError(""); setOtpStatus(""); }}
-                      className="w-full mt-3 border border-amber-300 text-amber-700 px-5 py-3 text-sm font-semibold rounded-xl bg-white hover:bg-amber-50"
+                      className="w-full btn-modern-secondary py-4 text-base"
                       disabled={loading}
                     >
-                      Back to Password Login
+                      Back to Password
                     </button>
                   </div>
-                )}
-              </>
-            ) : (
-              <div className="mt-2">
-                <h3 className="text-2xl font-bold text-gray-900 text-center">Create your account</h3>
-                <div className="bg-white rounded-2xl mt-5 p-1">
-                  <div className="bg-white rounded-2xl">
-            <input
-              type="text"
-              value={regFullName}
-              onChange={e => setRegFullName(e.target.value)}
-                      placeholder="Full name"
-                      className="w-full px-4 py-3 mb-3 rounded-xl border border-gray-300 text-sm"
-              autoComplete="name"
-            />
-            <input
-              type="email"
-              value={regEmail}
-              onChange={e => setRegEmail(e.target.value)}
-                      placeholder="Email address"
-                      className="w-full px-4 py-3 mb-3 rounded-xl border border-gray-300 text-sm"
-              autoComplete="username"
-            />
-            <input
-              type="password"
-              value={regPassword}
-              onChange={e => setRegPassword(e.target.value)}
-                      placeholder="Password"
-                      className="w-full px-4 py-3 mb-3 rounded-xl border border-gray-300 text-sm"
-              autoComplete="new-password"
-            />
-            <input
-              type="password"
-              value={regConfirm}
-              onChange={e => setRegConfirm(e.target.value)}
-                      placeholder="Confirm password"
-                      className="w-full px-4 py-3 mb-3 rounded-xl border border-gray-300 text-sm"
-              autoComplete="new-password"
-            />
-            {regError && <div className="text-red-600 text-xs mb-2 text-center">{regError}</div>}
-            {regSuccess && <div className="text-green-600 text-xs mb-2 text-center">{regSuccess}</div>}
-            <button
-              onClick={async () => {
-                setRegError(""); setRegSuccess("");
-                if (!regFullName || !regEmail || !regPassword || !regConfirm) {
-                  setRegError("Please fill all fields"); return;
-                }
-                if (regPassword.length < 6) {
-                  setRegError("Password must be at least 6 characters"); return;
-                }
-                if (regPassword !== regConfirm) {
-                  setRegError("Passwords do not match"); return;
-                }
-                setRegLoading(true);
-                const { data, error } = await supabase.auth.signUp({ email: regEmail, password: regPassword });
-                if (error) {
-                  const msg = (error.message || "").toLowerCase();
-                  if (msg.includes("rate limit")) {
-                    setRegError("Too many email requests. Please wait before trying again.");
-                    setRegCooldown(60);
-                    const timer = setInterval(() => {
-                      setRegCooldown((s) => {
-                        if (s <= 1) { clearInterval(timer); return 0; }
-                        return s - 1;
-                      });
-                    }, 1000);
-                  } else {
-                    setRegError(error.message);
-                  }
-                } else if (data && data.user) {
-                      try {
-                        localStorage.setItem("pendingProfile", JSON.stringify({
-                          email: regEmail,
-                          full_name: regFullName
-                        }));
-                      } catch {}
-                  setRegSuccess("Registration successful! Please check your email to verify your account.");
-                } else {
-                  setRegError('Unknown registration error.');
-                }
-                setRegLoading(false);
-              }}
-                      className="w-full bg-amber-500 hover:bg-amber-600 text-white px-5 py-3 text-sm font-semibold rounded-xl"
-              disabled={regLoading || regCooldown > 0}
-            >
-              {regLoading ? "Registering..." : regCooldown > 0 ? `Retry in ${regCooldown}s` : "Register"}
-            </button>
-            <p className="text-xs text-center mt-3">
-              Already have an account?{' '}
-                      <button className="text-amber-700 font-semibold" onClick={() => setShowRegister(false)}>
-                Login here
-              </button>
-            </p>
-                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="mt-2">
+              <div className="text-center mb-10">
+                <h3 className="text-3xl font-black text-slate-900 tracking-tight">Create Account</h3>
+                <p className="text-sm text-slate-500 mt-2 font-medium">Join the Gudora family today</p>
+              </div>
+              
+              <div className="space-y-4">
+                <input
+                  type="text"
+                  value={regFullName}
+                  onChange={e => setRegFullName(e.target.value)}
+                  placeholder="Full Name"
+                  className="input-modern"
+                  autoComplete="name"
+                />
+                <input
+                  type="email"
+                  value={regEmail}
+                  onChange={e => setRegEmail(e.target.value)}
+                  placeholder="Email Address"
+                  className="input-modern"
+                  autoComplete="username"
+                />
+                <input
+                  type="password"
+                  value={regPassword}
+                  onChange={e => setRegPassword(e.target.value)}
+                  placeholder="Create Password"
+                  className="input-modern"
+                  autoComplete="new-password"
+                />
+                <input
+                  type="password"
+                  value={regConfirm}
+                  onChange={e => setRegConfirm(e.target.value)}
+                  placeholder="Confirm Password"
+                  className="input-modern"
+                  autoComplete="new-password"
+                />
+                
+                {regError && <div className="bg-red-50 text-red-600 text-xs p-3 rounded-xl border border-red-100 text-center font-bold">{regError}</div>}
+                {regSuccess && <div className="bg-green-50 text-green-700 text-xs p-3 rounded-xl border border-green-100 text-center font-bold">{regSuccess}</div>}
+                
+                <div className="pt-4 space-y-4">
+                  <button
+                    onClick={async () => {
+                      setRegError(""); setRegSuccess("");
+                      if (!regFullName || !regEmail || !regPassword || !regConfirm) {
+                        setRegError("Please fill all fields"); return;
+                      }
+                      if (regPassword.length < 6) {
+                        setRegError("Password must be at least 6 characters"); return;
+                      }
+                      if (regPassword !== regConfirm) {
+                        setRegError("Passwords do not match"); return;
+                      }
+                      setRegLoading(true);
+                      const { data, error } = await supabase.auth.signUp({ email: regEmail, password: regPassword });
+                      if (error) {
+                        const msg = (error.message || "").toLowerCase();
+                        if (msg.includes("rate limit")) {
+                          setRegError("Too many email requests. Please wait.");
+                          setRegCooldown(60);
+                        } else {
+                          setRegError(error.message);
+                        }
+                      } else if (data && data.user) {
+                        try {
+                          localStorage.setItem("pendingProfile", JSON.stringify({
+                            email: regEmail,
+                            full_name: regFullName
+                          }));
+                        } catch {}
+                        setRegSuccess("Registration successful! Check your email to verify.");
+                      }
+                      setRegLoading(false);
+                    }}
+                    className="w-full btn-modern-primary py-4 text-base"
+                    disabled={regLoading || regCooldown > 0}
+                  >
+                    {regLoading ? "Registering..." : regCooldown > 0 ? `Retry in ${regCooldown}s` : "Create Account"}
+                  </button>
+                  <p className="text-sm text-slate-500 text-center font-medium">
+                    Already have an account?{" "}
+                    <button className="text-green-800 font-black hover:underline underline-offset-4" onClick={() => setShowRegister(false)}>Login here</button>
+                  </p>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

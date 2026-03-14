@@ -9,13 +9,11 @@ const products = [
     category: "powder",
     description: "Pure Kolhapuri jaggery powder made from natural sugarcane juice. No chemicals. No preservatives.",
     images: [
-      "/images/uploads/jaggery-powder-1.png",
-      "/images/uploads/jaggery-powder-2.png",
-      "/images/uploads/jaggery-powder-3.png",
-      "/images/products/Jaggery-Powder.png",
-      "/images/products/Jaggery-Powder-2.png",
-      "/images/products/Jaggery-Powder-3.png"
-    ]
+      "/images/products/Jar-Front.png",
+      "/images/products/Jar-Back.png"
+    ],
+    supportLeft: "/images/products/Jar-Front.png",
+    supportRight: "/images/products/Jar-Back.png"
   },
 
   {
@@ -28,10 +26,11 @@ const products = [
     category: "blocks",
     description: "Traditional solid jaggery blocks prepared using age-old Kolhapuri methods.",
     images: [
-      "/images/products/Jaggery-Blocks.png",
-      "/images/products/Jaggery-Block-2.png",
-      "/images/products/Jaggery-Block-3.png"
-    ]
+      "/images/products/small-block-front.png",
+      "/images/products/Package-Back.png"
+    ],
+    supportLeft: "/images/products/small-block-front.png",
+    supportRight: "/images/products/Package-Back.png"
   },
 
   {
@@ -44,10 +43,11 @@ const products = [
     category: "organic",
     description: "Certified organic jaggery with rich taste and natural minerals.",
     images: [
-      "/images/products/Jaggery-Powder-Bottle.png",
-      "/images/products/organic-jaggery/nutrition.png",
-      "/images/products/organic-jaggery/benefits.png"
-    ]
+      "/images/products/powder-front.png",
+      "/images/products/Package-Back.png"
+    ],
+    supportLeft: "/images/products/powder-front.png",
+    supportRight: "/images/products/Package-Back.png"
   },
 
   {
@@ -60,10 +60,11 @@ const products = [
     category: "premium",
     description: "Premium Kolhapuri gud known for its deep aroma, rich color, and authentic taste.",
     images: [
-      "/images/products/Jaggery-Big-Blocks.png",
-      "/images/products/kolhapuri-gud/process.png",
-      "/images/products/kolhapuri-gud/serving.png"
-    ]
+      "/images/products/Big-Block-Front.png",
+      "/images/products/Big-Block-Front.png"
+    ],
+    supportLeft: "/images/products/Big-Block-Front.png",
+    supportRight: "/images/products/Big-Block-Front.png"
   }
 ];
 
