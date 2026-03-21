@@ -1,153 +1,234 @@
 import { useEffect, useRef, useState } from "react";
+import { Star, CheckCircle, MapPin, User, ChevronLeft, ChevronRight, ShieldCheck, Leaf, Factory, Users, Package } from "lucide-react";
 import reviews from "../data/reviews";
 
 const GAP = 24;
 
 export default function CustomerReviews() {
   const trackRef = useRef(null);
-  const timerRef = useRef(null);
-  const [cardsPerView, setCardsPerView] = useState(2);
-  const [step, setStep] = useState(640 * 2 + GAP * 2);
-  const totalPages = Math.ceil(reviews.length / cardsPerView);
-  const [page, setPage] = useState(1);
-  const [hovered, setHovered] = useState(false);
+  const [cardsPerView, setCardsPerView] = useState(3);
   const [filter, setFilter] = useState("all");
+  const [hovered, setHovered] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  /* ---------- AUTO SLIDE ---------- */
-  useEffect(() => {
-    if (hovered) return;
-
-    timerRef.current = setInterval(() => {
-      next();
-    }, 5000);
-
-    return () => clearInterval(timerRef.current);
-  }, [hovered, page]);
+  const filteredReviews = filter === "all" ? reviews : reviews.filter(r => r.category === filter);
+  
+  const totalReviews = reviews.length;
+  const avgRating = 4.6;
+  
+  const ratingDistribution = [
+    { stars: 5, count: 6, percentage: 75 },
+    { stars: 4, count: 2, percentage: 20 },
+    { stars: 3, count: 1, percentage: 5 },
+    { stars: 2, count: 0, percentage: 0 },
+    { stars: 1, count: 0, percentage: 0 },
+  ];
 
   useEffect(() => {
     const update = () => {
       const w = window.innerWidth;
-      const cpv = w < 768 ? 1 : 2;
-      setCardsPerView(cpv);
-      const el = trackRef.current;
-      const containerWidth = el ? el.clientWidth : 640;
-      const s = cpv === 1 ? containerWidth + GAP : 640 * 2 + GAP * 2;
-      setStep(s);
-      setPage(1);
-      if (el) {
-        el.scrollTo({ left: 0 });
-      }
+      if (w < 768) setCardsPerView(1);
+      else if (w < 1280) setCardsPerView(2);
+      else setCardsPerView(3);
     };
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  const getCategory = (r) => {
-    const img = (r.productImage || "").toLowerCase();
-    if (img.includes("blocks")) return "blocks";
-    if (img.includes("bottle") || img.includes("powder")) return "powder";
-    if (img.includes("organic")) return "organic";
-    return "all";
-  };
-  const filtered = filter === "all" ? reviews : reviews.filter((r) => getCategory(r) === filter);
-  const avg = 4.6;
-  const total = reviews.length;
-
   const next = () => {
-    const el = trackRef.current;
-    if (!el) return;
-
-    const nextPage = page === totalPages ? 1 : page + 1;
-    setPage(nextPage);
-
-    el.scrollTo({
-      left: (nextPage - 1) * step,
-      behavior: "smooth",
-    });
+    if (currentIndex < filteredReviews.length - cardsPerView) {
+      setCurrentIndex(prev => prev + 1);
+    } else {
+      setCurrentIndex(0);
+    }
   };
 
   const prev = () => {
-    const el = trackRef.current;
-    if (!el) return;
-
-    const prevPage = page === 1 ? totalPages : page - 1;
-    setPage(prevPage);
-
-    el.scrollTo({
-      left: (prevPage - 1) * step,
-      behavior: "smooth",
-    });
+    if (currentIndex > 0) {
+      setCurrentIndex(prev => prev - 1);
+    } else {
+      setCurrentIndex(Math.max(0, filteredReviews.length - cardsPerView));
+    }
   };
 
-  return (
-    <section className="py-20 bg-[#faf7f3]">
-      <div className="max-w-[1400px] mx-auto px-6">
+  useEffect(() => {
+    if (hovered) return;
+    const timer = setInterval(next, 5000);
+    return () => clearInterval(timer);
+  }, [hovered, currentIndex, filteredReviews.length, cardsPerView]);
 
-        <div className="mb-8">
-          <h2 className="text-center text-3xl md:text-4xl font-bold text-[#5A3214]">
-            From Our Customers
+  return (
+    <section className="py-24 bg-[#FDFBF7]">
+      <div className="max-w-[1400px] mx-auto px-6">
+        
+        {/* Header Section */}
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-[#5A3214] mb-4">
+            Loved by 5000+ Families
           </h2>
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
-            <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-[#5A3214]/15 shadow-sm">
-              <span className="text-amber-500">★★★★★</span>
-              <span className="text-sm font-semibold text-[#5A3214]">{avg}/5</span>
-              <span className="text-xs text-[#5A3214]/60">· {total} reviews</span>
+          <p className="text-lg text-[#5A3214]/70 max-w-2xl mx-auto">
+            Experience the authentic taste of Kolhapuri Jaggery, trusted for its purity and traditional goodness.
+          </p>
+        </div>
+
+        {/* Highlights & Trust Badges */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#5A3214]/5 flex items-center gap-4 transition-transform hover:scale-105">
+            <div className="w-14 h-14 bg-amber-50 rounded-full flex items-center justify-center text-amber-600">
+              <Star className="w-7 h-7 fill-current" />
             </div>
-            {[
-              ["all", "All"],
-              ["powder", "Powder"],
-              ["blocks", "Blocks"],
-              ["organic", "Organic"],
-            ].map(([val, label]) => (
-              <button
-                key={val}
-                onClick={() => setFilter(val)}
-                className={`px-4 py-2 rounded-full text-sm font-semibold border transition ${
-                  filter === val
-                    ? "bg-green-700 text-white border-green-700"
-                    : "bg-white text-gray-700 border-gray-300 hover:border-green-700 hover:text-green-700"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+            <div>
+              <h4 className="text-xl font-bold text-[#5A3214]">{avgRating} Avg Rating</h4>
+              <p className="text-sm text-gray-500">Based on verified reviews</p>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#5A3214]/5 flex items-center gap-4 transition-transform hover:scale-105">
+            <div className="w-14 h-14 bg-green-50 rounded-full flex items-center justify-center text-green-600">
+              <Users className="w-7 h-7" />
+            </div>
+            <div>
+              <h4 className="text-xl font-bold text-[#5A3214]">5000+ Happy Customers</h4>
+              <p className="text-sm text-gray-500">Across Maharashtra & India</p>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#5A3214]/5 flex items-center gap-4 transition-transform hover:scale-105">
+            <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center text-blue-600">
+              <ShieldCheck className="w-7 h-7" />
+            </div>
+            <div>
+              <h4 className="text-xl font-bold text-[#5A3214]">Trusted by Families</h4>
+              <p className="text-sm text-gray-500">100% Natural & Chemical Free</p>
+            </div>
           </div>
         </div>
 
-        <div className="mb-4 hidden md:flex items-center justify-end gap-4">
-          <span className="text-sm text-gray-500">
-            {page} — {totalPages}
-          </span>
-          <button
-            onClick={prev}
-            className="h-9 w-9 rounded-full border border-gray-300 bg-white shadow hover:bg-green-50 transition"
-            aria-label="Previous reviews"
-          >
-            ←
-          </button>
-          <button
-            onClick={next}
-            className="h-9 w-9 rounded-full border border-gray-300 bg-white shadow hover:bg-green-50 transition"
-            aria-label="Next reviews"
-          >
-            →
-          </button>
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start mb-16">
+          {/* Left Side: Rating Summary */}
+          <div className="lg:col-span-4 bg-white p-8 rounded-3xl shadow-lg border border-[#5A3214]/5">
+            <div className="text-center mb-8">
+              <div className="text-6xl font-black text-[#5A3214] mb-2">{avgRating}</div>
+              <div className="flex justify-center gap-1 mb-2">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star 
+                    key={s} 
+                    className={`w-6 h-6 transition-all duration-300 hover:scale-125 ${
+                      s <= 4 ? "fill-amber-400 text-amber-400" : "fill-amber-100 text-amber-100"
+                    }`} 
+                  />
+                ))}
+              </div>
+              <div className="text-sm font-medium text-gray-500">Based on {totalReviews} verified reviews</div>
+            </div>
 
-        <div
-          ref={trackRef}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-          className="
-            flex gap-6
-            overflow-x-auto md:overflow-x-hidden
-            scroll-smooth
-          "
-        >
-          {filtered.map((review) => (
-            <ReviewCard key={review.id} review={review} />
-          ))}
+            <div className="space-y-4">
+              {ratingDistribution.map((item) => (
+                <div key={item.stars} className="flex items-center gap-4">
+                  <div className="flex items-center gap-1 min-w-[40px]">
+                    <span className="text-sm font-bold text-gray-700">{item.stars}</span>
+                    <Star className="w-3 h-3 fill-gray-400 text-gray-400" />
+                  </div>
+                  <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-amber-400 rounded-full transition-all duration-1000"
+                      style={{ width: `${item.percentage}%` }}
+                    />
+                  </div>
+                  <span className="text-sm text-gray-400 min-w-[30px]">{item.count}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-10 pt-8 border-t border-gray-100">
+              <h5 className="font-bold text-[#5A3214] mb-4">Our Quality Promises:</h5>
+              <ul className="space-y-3">
+                <li className="flex items-center gap-3 text-sm text-gray-600">
+                  <Leaf className="w-4 h-4 text-green-600" /> 100% Natural Jaggery
+                </li>
+                <li className="flex items-center gap-3 text-sm text-gray-600">
+                  <ShieldCheck className="w-4 h-4 text-green-600" /> No Added Chemicals
+                </li>
+                <li className="flex items-center gap-3 text-sm text-gray-600">
+                  <Factory className="w-4 h-4 text-green-600" /> Traditional Kolhapur Processing
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Right Side: Reviews with Filters */}
+          <div className="lg:col-span-8">
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { id: "all", label: "All Reviews" },
+                  { id: "powder", label: "Powder" },
+                  { id: "blocks", label: "Blocks" },
+                  { id: "cubes", label: "Cubes" },
+                  { id: "chikki", label: "Chikki" },
+                ].map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => {
+                      setFilter(f.id);
+                      setCurrentIndex(0);
+                    }}
+                    className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
+                      filter === f.id
+                        ? "bg-[#5A3214] text-white shadow-md shadow-[#5A3214]/20"
+                        : "bg-white text-[#5A3214] border border-[#5A3214]/10 hover:border-[#5A3214]/30"
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={prev}
+                  className="w-10 h-10 rounded-full bg-white border border-[#5A3214]/10 flex items-center justify-center text-[#5A3214] hover:bg-[#5A3214] hover:text-white transition-all shadow-sm"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={next}
+                  className="w-10 h-10 rounded-full bg-white border border-[#5A3214]/10 flex items-center justify-center text-[#5A3214] hover:bg-[#5A3214] hover:text-white transition-all shadow-sm"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <div 
+              className="relative overflow-hidden"
+              onMouseEnter={() => setHovered(true)}
+              onMouseLeave={() => setHovered(false)}
+            >
+              <div 
+                className="flex transition-transform duration-500 ease-out"
+                style={{ 
+                  transform: `translateX(-${currentIndex * (100 / cardsPerView)}%)`,
+                  width: `${(filteredReviews.length / cardsPerView) * 100}%`
+                }}
+              >
+                {filteredReviews.map((review) => (
+                  <div 
+                    key={review.id} 
+                    className="px-3"
+                    style={{ width: `${100 / filteredReviews.length}%` }}
+                  >
+                    <ReviewCard review={review} />
+                  </div>
+                ))}
+              </div>
+              
+              {filteredReviews.length === 0 && (
+                <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
+                  <p className="text-gray-500">No reviews found for this category yet.</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -156,37 +237,66 @@ export default function CustomerReviews() {
 
 function ReviewCard({ review }) {
   return (
-    <div
-      className="
-        flex flex-col md:flex-row gap-6
-        w-full md:w-[640px]
-        shrink-0
-        animate-fadeSlide
-      "
-    >
-      <div className="w-full md:w-[300px] bg-white rounded-2xl shadow flex items-center justify-center">
-        <img
-          src={review.productImage}
-          alt="Product"
-          className="max-h-56 object-contain"
-        />
-      </div>
-
-      <div className="flex-1 bg-white rounded-2xl shadow p-8">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="h-9 w-9 rounded-full bg-green-100 text-green-800 font-bold flex items-center justify-center">
-            {review.name?.[0] || "U"}
+    <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#5A3214]/5 flex flex-col h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group animate-reveal">
+      {/* Customer Info */}
+      <div className="flex items-center gap-4 mb-6">
+        <div className="relative">
+          <div className="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center text-[#5A3214] border-2 border-[#5A3214]/10 overflow-hidden">
+            <User className="w-7 h-7" />
           </div>
-          <div>
-            <h4 className="text-base font-semibold text-[#5A3214]">{review.name}</h4>
-            <p className="text-xs text-gray-500">{review.location}</p>
-          </div>
-          <div className="ml-auto text-xs text-green-700 font-semibold bg-green-50 px-2 py-1 rounded">
-            Verified buyer
+          <div className="absolute -bottom-1 -right-1 bg-green-500 text-white rounded-full p-1 border-2 border-white" title="Verified Buyer">
+            <CheckCircle className="w-3 h-3 fill-current" />
           </div>
         </div>
-        <div className="text-amber-500 text-sm mb-3">★★★★☆</div>
-        <p className="text-gray-700 leading-relaxed">{review.text}</p>
+        <div>
+          <div className="flex items-center gap-2">
+            <h4 className="font-bold text-[#5A3214]">{review.name}</h4>
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-green-50 text-green-700 uppercase tracking-wider">
+              Verified
+            </span>
+          </div>
+          <div className="flex items-center gap-1 text-xs text-gray-400">
+            <MapPin className="w-3 h-3" />
+            {review.location}
+          </div>
+        </div>
+      </div>
+
+      {/* Star Rating */}
+      <div className="flex gap-0.5 mb-4">
+        {[1, 2, 3, 4, 5].map((s) => (
+          <Star 
+            key={s} 
+            className={`w-4 h-4 transition-all duration-300 group-hover:scale-110 ${
+              s <= review.rating ? "fill-amber-400 text-amber-400" : "fill-gray-100 text-gray-100"
+            }`} 
+          />
+        ))}
+      </div>
+
+      {/* Review Text */}
+      <p className="text-[#5A3214]/80 text-sm leading-relaxed mb-6 flex-grow italic">
+        "{review.text}"
+      </p>
+
+      {/* Product Context */}
+      <div className="mt-auto pt-6 border-t border-gray-50">
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 rounded-xl bg-gray-50 p-2 flex items-center justify-center group-hover:bg-amber-50 transition-colors">
+            <img 
+              src={review.productImage} 
+              alt={review.productName} 
+              className="max-w-full max-h-full object-contain mix-blend-multiply"
+              onError={(e) => {
+                e.target.src = "/images/products/AllProduct.png"; // Fallback image
+              }}
+            />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-0.5">Reviewed Product</span>
+            <h5 className="text-sm font-bold text-[#5A3214] line-clamp-1">{review.productName}</h5>
+          </div>
+        </div>
       </div>
     </div>
   );

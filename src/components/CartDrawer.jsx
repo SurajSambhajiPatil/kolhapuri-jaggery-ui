@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import cartApi from "../lib/cart";
-import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, Truck } from "lucide-react";
+import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, Truck, Gift } from "lucide-react";
 
 export default function CartDrawer() {
   const [open, setOpen] = useState(false);
@@ -81,51 +81,78 @@ export default function CartDrawer() {
             </div>
           ) : (
             cart.map((item) => (
-              <div key={item.id} className="flex gap-5 group/item relative">
+              <div key={item.id} className={`flex gap-5 group/item relative ${item.isFree ? 'bg-green-50/30 p-4 -mx-4 rounded-3xl border border-green-100/50' : ''}`}>
                 <div className="relative h-28 w-28 flex-shrink-0 bg-slate-50 rounded-[2rem] overflow-hidden border border-slate-100 p-3 group-hover/item:border-green-100 transition-colors">
                   <img
                     src={item.image}
                     alt={item.name}
                     className="h-full w-full object-contain transition-transform duration-500 group-hover/item:scale-110"
                   />
+                  {item.isFree && (
+                    <div className="absolute inset-0 bg-green-900/10 flex items-center justify-center">
+                      <Gift className="text-green-800 opacity-20" size={40} />
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex-1 flex flex-col justify-between py-1">
                   <div>
                     <div className="flex justify-between items-start gap-2">
-                      <h4 className="font-black text-slate-900 leading-tight text-base group-hover/item:text-green-900 transition-colors">
-                        {item.name}
-                      </h4>
-                      <button
-                        onClick={() => cartApi.removeItem(item.id)}
-                        className="text-slate-300 hover:text-red-500 transition-all duration-300 p-1 hover:bg-red-50 rounded-lg"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      <div className="flex flex-col gap-1">
+                        {item.isFree && (
+                          <span className="flex items-center gap-1 text-[9px] font-black text-green-700 uppercase tracking-widest bg-green-100 w-fit px-2 py-0.5 rounded-full">
+                            <Gift size={10} /> Free Gift
+                          </span>
+                        )}
+                        <h4 className="font-black text-slate-900 leading-tight text-base group-hover/item:text-green-900 transition-colors">
+                          {item.name}
+                        </h4>
+                      </div>
+                      {!item.isFree && (
+                        <button
+                          onClick={() => cartApi.removeItem(item.id)}
+                          className="text-slate-300 hover:text-red-500 transition-all duration-300 p-1 hover:bg-red-50 rounded-lg"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 mt-2">
-                      <span className="text-green-700 font-black text-sm">₹{item.price}</span>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Per Unit</span>
+                      {item.isFree ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-green-700 font-black text-sm">FREE</span>
+                          <span className="text-[10px] font-bold text-slate-300 line-through tracking-tighter">₹{item.originalPrice}</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span className="text-green-700 font-black text-sm">₹{item.price}</span>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Per Unit</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between mt-4">
-                    <div className="flex items-center bg-slate-50 rounded-xl p-1 border border-slate-100">
+                    <div className={`flex items-center rounded-xl p-1 border ${item.isFree ? 'bg-white border-green-100 opacity-60' : 'bg-slate-50 border-slate-100'}`}>
                       <button
-                        onClick={() => cartApi.updateQty(item.id, Math.max(0, item.qty - 1))}
-                        className="p-1.5 hover:bg-white rounded-lg text-slate-400 hover:text-slate-900 transition-all active:scale-90"
+                        onClick={() => !item.isFree && cartApi.updateQty(item.id, Math.max(0, item.qty - 1))}
+                        disabled={item.isFree}
+                        className="p-1.5 hover:bg-white rounded-lg text-slate-400 hover:text-slate-900 transition-all active:scale-90 disabled:cursor-not-allowed"
                       >
                         <Minus size={14} />
                       </button>
                       <span className="w-8 text-center text-xs font-black text-slate-900">{item.qty}</span>
                       <button
-                        onClick={() => cartApi.updateQty(item.id, item.qty + 1)}
-                        className="p-1.5 hover:bg-white rounded-lg text-slate-400 hover:text-slate-900 transition-all active:scale-90"
+                        onClick={() => !item.isFree && cartApi.updateQty(item.id, item.qty + 1)}
+                        disabled={item.isFree}
+                        className="p-1.5 hover:bg-white rounded-lg text-slate-400 hover:text-slate-900 transition-all active:scale-90 disabled:cursor-not-allowed"
                       >
                         <Plus size={14} />
                       </button>
                     </div>
-                    <p className="text-base font-black text-slate-900 tracking-tight">₹{item.price * item.qty}</p>
+                    <p className={`text-base font-black tracking-tight ${item.isFree ? 'text-green-700' : 'text-slate-900'}`}>
+                      {item.isFree ? '₹0' : `₹${item.price * item.qty}`}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -151,6 +178,12 @@ export default function CartDrawer() {
                 style={{ width: `${Math.min(100, (subtotal / shippingThreshold) * 100)}%` }}
               />
             </div>
+            {/* FREE CHIKKI NOTIFICATION */}
+            {!isFreeShipping && (
+              <p className="text-[10px] font-black text-[#D9A441] uppercase tracking-[0.1em] flex items-center gap-2 bg-amber-50 p-2 rounded-xl border border-amber-100 animate-pulse">
+                <Gift size={12} /> Get FREE Gudora Chikki on orders above ₹499
+              </p>
+            )}
           </div>
 
           {/* TOTALS */}

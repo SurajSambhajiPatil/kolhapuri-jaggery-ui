@@ -1,5 +1,6 @@
 const BASE_KEY = "kolhapuri_cart";
 const USER_KEY = "current_user_id";
+const FREE_CHIKKI_ID = "free-chikki-promo";
 
 function key() {
   try {
@@ -20,8 +21,33 @@ function read(k) {
 }
 
 function write(cart, k) {
-  localStorage.setItem(k || key(), JSON.stringify(cart));
-  window.dispatchEvent(new CustomEvent("cartUpdated", { detail: cart }));
+  const updatedCart = applySpecialOffers(cart);
+  localStorage.setItem(k || key(), JSON.stringify(updatedCart));
+  window.dispatchEvent(new CustomEvent("cartUpdated", { detail: updatedCart }));
+}
+
+function applySpecialOffers(cart) {
+  // Filter out existing free chikki to re-evaluate
+  let newCart = cart.filter(item => item.id !== FREE_CHIKKI_ID);
+  
+  const sub = newCart.reduce((s, it) => s + (it.price || 0) * (it.qty || 1), 0);
+  const isFirstOrder = localStorage.getItem("is_first_order") !== "false"; // Assume true if not set
+  const overThreshold = sub >= 499;
+
+  if (overThreshold || isFirstOrder) {
+    newCart.push({
+      id: FREE_CHIKKI_ID,
+      name: "Gudora Special Chikki",
+      price: 0,
+      originalPrice: 120,
+      image: "/images/products/Chikki.png",
+      qty: 1,
+      isFree: true,
+      promoType: overThreshold ? "ORDER_VALUE" : "FIRST_ORDER"
+    });
+  }
+
+  return newCart;
 }
 
 export function getCart() {
@@ -40,11 +66,13 @@ export function addToCart(item) {
 }
 
 export function updateQty(id, qty) {
+  if (id === FREE_CHIKKI_ID) return; // Cannot manually update free item qty
   const cart = read().map((c) => (c.id === id ? { ...c, qty } : c)).filter((c) => c.qty > 0);
   write(cart);
 }
 
 export function removeItem(id) {
+  if (id === FREE_CHIKKI_ID) return; // Cannot manually remove free item
   const cart = read().filter((c) => c.id !== id);
   write(cart);
 }

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import * as cart from "../lib/cart";
 import { useAuth } from "../lib/auth.jsx";
 import LoginModal from "../components/LoginModal";
-import { ShoppingBag, ArrowRight, Trash2, Minus, Plus, ShieldCheck, Truck, RefreshCw } from "lucide-react";
+import { ShoppingBag, ArrowRight, Trash2, Minus, Plus, ShieldCheck, Truck, RefreshCw, Gift } from "lucide-react";
 
 export default function CartPage() {
   const { user } = useAuth();
@@ -77,6 +77,11 @@ export default function CartPage() {
                 style={{ width: `${Math.min(100, (total / freeShipThreshold) * 100)}%` }}
               />
             </div>
+            {total < freeShipThreshold && (
+              <p className="mt-4 text-[10px] font-black text-[#D9A441] uppercase tracking-[0.1em] flex items-center gap-2 bg-amber-50/50 p-2 rounded-xl border border-amber-100/50 w-fit">
+                <Gift size={12} /> Add items worth ₹{freeShipThreshold - total} more to get a FREE Gudora Special Chikki!
+              </p>
+            )}
           </div>
         )}
 
@@ -101,39 +106,55 @@ export default function CartPage() {
                 </div>
               ) : (
                 items.map((it) => (
-                  <div key={it.id} className="p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 group hover:bg-slate-50/50 transition-colors duration-500">
+                  <div key={it.id} className={`p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 group hover:bg-slate-50/50 transition-colors duration-500 ${it.isFree ? 'bg-green-50/20' : ''}`}>
                     <div className="h-24 w-24 sm:h-32 sm:w-32 flex-shrink-0 bg-slate-50 rounded-[2rem] p-4 border border-slate-100 group-hover:border-green-100 transition-colors relative">
                       <img src={it.image} alt={it.name} className="h-full w-full object-contain drop-shadow-lg transition-transform duration-500 group-hover:scale-110" />
+                      {it.isFree && (
+                        <div className="absolute inset-0 bg-green-900/5 flex items-center justify-center">
+                          <Gift className="text-green-800 opacity-10" size={48} />
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex-1 text-center sm:text-left min-w-0">
                       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-4">
                         <div>
+                          {it.isFree && (
+                            <span className="inline-flex items-center gap-1 text-[9px] font-black text-green-700 uppercase tracking-widest bg-green-100 px-2 py-0.5 rounded-full mb-2">
+                              <Gift size={10} /> Free Gift
+                            </span>
+                          )}
                           <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-tight group-hover:text-green-900 transition-colors">{it.name}</h3>
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">₹{it.price} Per Unit</p>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
+                            {it.isFree ? 'Promotional Gift' : `₹${it.price} Per Unit`}
+                          </p>
                         </div>
-                        <button
-                          onClick={() => cart.removeItem(it.id)}
-                          className="text-slate-300 hover:text-red-500 transition-all duration-300 p-2 hover:bg-red-50 rounded-xl mx-auto sm:mx-0"
-                          aria-label="Remove item"
-                        >
-                          <Trash2 size={18} />
-                        </button>
+                        {!it.isFree && (
+                          <button
+                            onClick={() => cart.removeItem(it.id)}
+                            className="text-slate-300 hover:text-red-500 transition-all duration-300 p-2 hover:bg-red-50 rounded-xl mx-auto sm:mx-0"
+                            aria-label="Remove item"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        )}
                       </div>
 
                       <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-                        <div className="flex items-center bg-slate-100 rounded-2xl p-1 border border-slate-200/50">
+                        <div className={`flex items-center rounded-2xl p-1 border ${it.isFree ? 'bg-white border-green-100 opacity-60' : 'bg-slate-100 border-slate-200/50'}`}>
                           <button
-                            onClick={() => cart.updateQty(it.id, Math.max(0, (it.qty || 1) - 1))}
-                            className="p-2 hover:bg-white rounded-xl text-slate-400 hover:text-slate-900 transition-all active:scale-90"
+                            onClick={() => !it.isFree && cart.updateQty(it.id, Math.max(0, (it.qty || 1) - 1))}
+                            disabled={it.isFree}
+                            className="p-2 hover:bg-white rounded-xl text-slate-400 hover:text-slate-900 transition-all active:scale-90 disabled:cursor-not-allowed"
                             aria-label="Decrease quantity"
                           >
                             <Minus size={16} />
                           </button>
                           <span className="w-10 text-center text-sm font-black text-slate-900">{it.qty}</span>
                           <button
-                            onClick={() => cart.updateQty(it.id, (it.qty || 1) + 1)}
-                            className="p-2 hover:bg-white rounded-xl text-slate-400 hover:text-slate-900 transition-all active:scale-90"
+                            onClick={() => !it.isFree && cart.updateQty(it.id, (it.qty || 1) + 1)}
+                            disabled={it.isFree}
+                            className="p-2 hover:bg-white rounded-xl text-slate-400 hover:text-slate-900 transition-all active:scale-90 disabled:cursor-not-allowed"
                             aria-label="Increase quantity"
                           >
                             <Plus size={16} />
@@ -141,7 +162,9 @@ export default function CartPage() {
                         </div>
                         <div className="text-right">
                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Item Total</p>
-                          <p className="text-xl font-black text-green-800 tracking-tighter">₹{(it.price || 0) * (it.qty || 1)}</p>
+                          <p className={`text-xl font-black tracking-tighter ${it.isFree ? 'text-green-700' : 'text-green-800'}`}>
+                            {it.isFree ? 'FREE' : `₹${(it.price || 0) * (it.qty || 1)}`}
+                          </p>
                         </div>
                       </div>
                     </div>

@@ -1,6 +1,16 @@
 import { Facebook, Instagram, Twitter, Mail, Phone, Globe, ArrowRight } from "lucide-react";
 
 export default function Footer() {
+  const goHomeAndScroll = (id) => {
+    localStorage.setItem("scrollTarget", id);
+    if (window.location.pathname === "/") {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      window.location.href = "/";
+    }
+  };
+
   return (
     <footer className="relative bg-[#1a1a1a] text-stone-400 pt-16 sm:pt-24 pb-12 overflow-hidden">
       {/* AMBIENT GLOW */}
@@ -34,7 +44,7 @@ export default function Footer() {
         <div className="grid gap-12 sm:gap-16 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {/* BRAND */}
           <div className="space-y-6 sm:space-y-8 text-center sm:text-left">
-            <img src="/images/hero/LogoV1.png" className="h-10 sm:h-12 brightness-0 invert mx-auto sm:mx-0" alt="Gudora Foods" />
+            <img src="/images/hero/LogoV1.png" className="h-10 sm:h-12 brightness-0 invert mx-auto sm:mx-0 cursor-pointer" alt="Gudora Foods" onClick={() => goHomeAndScroll("hero")} />
             <p className="text-xs sm:text-sm leading-relaxed font-medium max-w-xs mx-auto sm:mx-0">
               Pure Kolhapuri jaggery crafted with passion, preserving centuries of tradition while meeting modern health standards.
             </p>
@@ -51,12 +61,19 @@ export default function Footer() {
           <div className="text-center sm:text-left">
             <h4 className="text-white font-black uppercase tracking-widest text-[10px] sm:text-xs mb-6 sm:mb-8">Shop & Explore</h4>
             <ul className="space-y-3 sm:space-y-4 text-sm font-bold">
-              {["All Products", "Jaggery Powder", "Jaggery Blocks", "Organic Collection", "Our Process"].map((link) => (
-                <li key={link}>
-                  <a href="#" className="hover:text-white transition-colors flex items-center justify-center sm:justify-start gap-2 group">
+              {[
+                { label: "All Products", id: "products" },
+                { label: "Benefits", id: "benefits" },
+                { label: "Partner", id: "become-seller" }
+              ].map((link) => (
+                <li key={link.id}>
+                  <button 
+                    onClick={() => goHomeAndScroll(link.id)}
+                    className="hover:text-white transition-colors flex items-center justify-center sm:justify-start gap-2 group w-full text-left"
+                  >
                     <span className="w-1.5 h-1.5 rounded-full bg-green-900 group-hover:bg-green-500 transition-colors hidden sm:block" />
-                    {link}
-                  </a>
+                    {link.label}
+                  </button>
                 </li>
               ))}
             </ul>
@@ -66,9 +83,17 @@ export default function Footer() {
           <div className="text-center sm:text-left">
             <h4 className="text-white font-black uppercase tracking-widest text-[10px] sm:text-xs mb-6 sm:mb-8">Customer Support</h4>
             <ul className="space-y-3 sm:space-y-4 text-sm font-bold">
-              {["Track Order", "Shipping Policy", "Return & Refund", "Become a Seller", "Privacy Policy"].map((link) => (
-                <li key={link}>
-                  <a href="#" className="hover:text-white transition-colors">{link}</a>
+              {[
+                { label: "Track Order", url: "/orders" },
+                { label: "About Us", url: "/about" },
+                { label: "Privacy Policy", url: "#" },
+                { label: "Terms of Service", url: "#" }
+              ].map((link) => (
+                <li key={link.label}>
+                  <a href={link.url} className="hover:text-white transition-colors flex items-center justify-center sm:justify-start gap-2 group">
+                    <span className="w-1.5 h-1.5 rounded-full bg-stone-700 group-hover:bg-stone-500 transition-colors hidden sm:block" />
+                    {link.label}
+                  </a>
                 </li>
               ))}
             </ul>

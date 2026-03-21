@@ -9,7 +9,6 @@ import BecomeSeller from "./components/BecomeSeller";
 import GetHealthTips from "./components/GetHealthTips";
 import Footer from "./components/Footer";
 import WhyGudoraFood from "./components/WhyGudoraFood";
-import ProcessSection from "./components/ProcessSection";
 
 import LoginModal from "./components/LoginModal";
 import JoinUsModal from "./components/JoinUsModal";
@@ -167,7 +166,7 @@ export default function App() {
       <Hero />
 
       {/* PRODUCTS */}
-      <section className="relative bg-[#fafaf8] py-24 md:py-32" id="products"> 
+      <section className="relative bg-[#fafaf8] py-16 md:py-24" id="products"> 
         <div className="section-container">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
             <div className="reveal">
@@ -209,7 +208,6 @@ export default function App() {
       </section>
 
       <ComboSection />
-      <ProcessSection />
       <WhyGudoraFood />
 
       <section id="reviews">
