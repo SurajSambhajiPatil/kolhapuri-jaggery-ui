@@ -10,8 +10,12 @@ export default function ProductCard({ product }) {
   const [open, setOpen] = useState(false);
   const [qty, setQty] = useState(1);
   const [viewerMode, setViewerMode] = useState("image");
+  const [selectedVariant, setSelectedVariant] = useState(product.variants?.[0] ?? null);
 
-  const cardImage = images[activeImage] || images[0];
+  const displayPrice = selectedVariant?.price ?? product.price;
+  const displayWeight = selectedVariant?.weight ?? product.weight;
+  const cardImage = selectedVariant?.image ?? (images[activeImage] || images[0]);
+  const modalImage = selectedVariant?.image ?? cardImage;
 
   return (
     <div 
@@ -23,7 +27,7 @@ export default function ProductCard({ product }) {
         {/* BADGES - SMALLER */}
         <div className="absolute top-3 left-3 sm:top-4 sm:left-4 flex flex-col gap-1.5 z-20">
           <span className="bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest text-slate-900 border border-slate-200 shadow-sm">
-            {product.weight}
+            {displayWeight}
           </span>
           {product.price >= 499 && (
             <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-lg shadow-amber-500/20 flex items-center gap-1 animate-pulse-subtle">
@@ -104,12 +108,30 @@ export default function ProductCard({ product }) {
           </p>
         </div>
 
+        {product.variants && (
+          <div className="flex flex-wrap gap-1.5 mt-3">
+            {product.variants.map((v) => (
+              <button
+                key={v.weight}
+                onClick={() => setSelectedVariant(v)}
+                className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all ${
+                  selectedVariant?.weight === v.weight
+                    ? "bg-green-900 text-white border-green-900 shadow-md shadow-green-900/20"
+                    : "bg-white text-slate-500 border-slate-200 hover:border-green-700 hover:text-green-800"
+                }`}
+              >
+                {v.weight}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="flex items-center justify-between mt-auto pt-6 border-t border-slate-50">
           <div className="flex flex-col">
             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Price</span>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-xl font-black text-slate-900 tracking-tighter">₹{product.price}</span>
-              {product.price >= 499 && (
+              <span className="text-xl font-black text-slate-900 tracking-tighter">₹{displayPrice}</span>
+              {displayPrice >= 499 && (
                 <span className="text-[8px] font-black text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full border border-green-100 uppercase tracking-tighter">
                   + Gift
                 </span>
@@ -120,7 +142,7 @@ export default function ProductCard({ product }) {
           <button
             onClick={() => {
               import("../lib/cart").then((c) => {
-                c.addToCart({ ...product, image: cardImage, qty: 1 });
+                c.addToCart({ ...product, price: displayPrice, weight: displayWeight, image: cardImage, qty: 1 });
                 if (window.__showCartModal) window.__showCartModal();
               });
             }}
@@ -163,23 +185,32 @@ export default function ProductCard({ product }) {
               <div className="flex-1 flex items-center justify-center relative min-h-0">
                 <div className="absolute inset-0 bg-green-200/20 blur-[60px] rounded-full" />
                 {viewerMode === "3d" ? (
-                  <ProductThreeView imageUrl={cardImage} />
+                  <ProductThreeView imageUrl={modalImage} />
                 ) : (
-                  <img src={cardImage} alt={product.name} className="relative z-10 max-h-full object-contain drop-shadow-2xl animate-float" />
+                  <img src={modalImage} alt={product.name} className="relative z-10 max-h-full object-contain drop-shadow-2xl animate-float" />
                 )}
               </div>
 
-              {/* THUMBS */}
+              {/* THUMBS — for variant products show variant images, otherwise show all images */}
               <div className="flex gap-2 mt-6 justify-center">
-                {images.map((img, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveImage(i)}
-                    className={`w-12 h-12 rounded-xl p-1.5 border-2 transition-all ${activeImage === i ? 'border-green-600 bg-white shadow-md' : 'border-transparent hover:border-slate-200'}`}
-                  >
-                    <img src={img} className="w-full h-full object-contain" />
-                  </button>
-                ))}
+                {(product.variants ?? images.map((img, i) => ({ image: img, weight: i }))).map((v, i) => {
+                  const thumb = product.variants ? v.image : v;
+                  const isActive = product.variants
+                    ? selectedVariant?.weight === v.weight
+                    : activeImage === i;
+                  const onClick = product.variants
+                    ? () => setSelectedVariant(v)
+                    : () => setActiveImage(i);
+                  return (
+                    <button
+                      key={i}
+                      onClick={onClick}
+                      className={`w-12 h-12 rounded-xl p-1.5 border-2 transition-all ${isActive ? 'border-green-600 bg-white shadow-md' : 'border-transparent hover:border-slate-200'}`}
+                    >
+                      <img src={thumb} className="w-full h-full object-contain" />
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -199,16 +230,37 @@ export default function ProductCard({ product }) {
                   {product.name}
                 </h2>
                 <div className="flex items-baseline gap-2.5 mb-5">
-                  <div className="text-xl md:text-2xl font-black text-green-900">₹{product.price}</div>
-                  {product.price >= 499 && (
+                  <div className="text-xl md:text-2xl font-black text-green-900">₹{displayPrice}</div>
+                  {displayPrice >= 499 && (
                     <div className="text-[9px] font-black text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-100 flex items-center gap-1">
                       <Gift size={11} /> Includes Free Chikki
                     </div>
                   )}
                 </div>
-                <p className="text-slate-500 font-medium leading-relaxed text-xs md:text-sm mb-6">
+                <p className="text-slate-500 font-medium leading-relaxed text-xs md:text-sm mb-4">
                   {product.description}
                 </p>
+
+                {product.variants && (
+                  <div className="mb-2">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Select Weight</p>
+                    <div className="flex flex-wrap gap-2">
+                      {product.variants.map((v) => (
+                        <button
+                          key={v.weight}
+                          onClick={() => setSelectedVariant(v)}
+                          className={`px-4 py-2 rounded-xl text-xs font-black border transition-all ${
+                            selectedVariant?.weight === v.weight
+                              ? "bg-green-900 text-white border-green-900 shadow-lg shadow-green-900/20"
+                              : "bg-white text-slate-600 border-slate-200 hover:border-green-700 hover:text-green-800"
+                          }`}
+                        >
+                          {v.weight} — ₹{v.price}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-4 pt-6 border-t border-slate-100">
@@ -221,7 +273,7 @@ export default function ProductCard({ product }) {
                   <button
                     onClick={() => {
                       import("../lib/cart").then((c) => {
-                        c.addToCart({ ...product, image: cardImage, qty });
+                        c.addToCart({ ...product, price: displayPrice, weight: displayWeight, image: modalImage, qty });
                         if (window.__showCartModal) window.__showCartModal();
                         setOpen(false);
                       });

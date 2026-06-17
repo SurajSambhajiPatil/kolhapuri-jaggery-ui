@@ -6,26 +6,27 @@ import ProductCard from "./components/ProductCard";
 import ComboSection from "./components/ComboSection";
 import CustomerReviews from "./components/CustomerReviews";
 import BecomeSeller from "./components/BecomeSeller";
-import GetHealthTips from "./components/GetHealthTips";
 import Footer from "./components/Footer";
 import WhyGudoraFood from "./components/WhyGudoraFood";
 
 import LoginModal from "./components/LoginModal";
-import JoinUsModal from "./components/JoinUsModal";
 import CartDrawer from "./components/CartDrawer";
+import HealthTipsPopup from "./components/HealthTipsPopup";
+import ShopBestsellers from "./components/ShopBestsellers";
 
 import Category from "./pages/Category";
-import Checkout from "./pages/Checkout"; 
+import Checkout from "./pages/Checkout";
 import OrderTracker from "./pages/OrderTracker";
 import ResetPassword from "./pages/ResetPassword";
 import Cart from "./pages/Cart";
 import About from "./pages/About";
+import Profile from "./pages/Profile";
+import Admin from "./pages/Admin";
 
 import products from "./data/products";
 
 export default function App() {
   const [showLogin, setShowLogin] = useState(false);
-  const [showJoin, setShowJoin] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const scrollerRef = useRef(null);
   const [progress, setProgress] = useState(0);
@@ -57,37 +58,13 @@ export default function App() {
     }
   }, []);
 
-  useEffect(() => {
-    if (window.location.pathname !== "/") return;
-    const sp = new URLSearchParams(window.location.search);
-    if (sp.get("joinus") === "1") {
-      setShowJoin(true);
-      return;
-    }
-    const until = parseInt(localStorage.getItem("joinUsDismissedUntil") || "0", 10);
-    if (until && until > Date.now()) return;
-    const subscribed = localStorage.getItem("joinUsSubscribed") === "true";
-    if (subscribed) return;
-    const t = setTimeout(() => setShowJoin(true), 6000);
-    const onScroll = () => {
-      if (window.scrollY > 200) {
-        setShowJoin(true);
-        window.removeEventListener("scroll", onScroll);
-      }
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      clearTimeout(t);
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, []);
-
   /* ================= SHARED COMPONENTS ================= */
   const renderShared = () => (
     <>
       <Navbar onLoginClick={() => setShowLogin(true)} />
       <LoginModal visible={showLogin} onClose={() => setShowLogin(false)} />
       <CartDrawer />
+      <HealthTipsPopup onLoginClick={() => setShowLogin(true)} />
     </>
   );
 
@@ -153,6 +130,25 @@ export default function App() {
     );
   }
 
+  if (pathname === "/profile") {
+    return (
+      <>
+        {renderShared()}
+        <Profile />
+        <Footer />
+      </>
+    );
+  }
+
+  if (pathname === "/admin") {
+    return (
+      <>
+        {renderShared()}
+        <Admin />
+      </>
+    );
+  }
+
   /* ================= HOME PAGE ================= */
   const filteredProducts = selectedCategory === "all" 
     ? products 
@@ -161,8 +157,6 @@ export default function App() {
   return (
     <>
       {renderShared()}
-      <JoinUsModal visible={showJoin} onClose={() => setShowJoin(false)} />
-
       <Hero />
 
       {/* PRODUCTS */}
@@ -207,18 +201,18 @@ export default function App() {
         </div>
       </section>
 
+      <ShopBestsellers />
       <ComboSection />
       <WhyGudoraFood />
-
-      <section id="reviews">
-        <CustomerReviews />
-      </section>
 
       <section id="become-seller">
         <BecomeSeller />
       </section>
 
-      <GetHealthTips />
+      <section id="reviews">
+        <CustomerReviews />
+      </section>
+
       <Footer />
     </>
   );

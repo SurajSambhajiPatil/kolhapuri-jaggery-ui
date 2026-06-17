@@ -57,10 +57,12 @@ export function getCart() {
 export function addToCart(item) {
   const cart = read();
   const idx = cart.findIndex((c) => c.id === item.id);
+  const normalized = { ...item, price: Number(item.price) || 0, qty: item.qty || 1 };
   if (idx >= 0) {
-    cart[idx].qty = (cart[idx].qty || 1) + (item.qty || 1);
+    cart[idx].qty = (cart[idx].qty || 1) + normalized.qty;
+    cart[idx].price = normalized.price; // ensure numeric
   } else {
-    cart.push({ ...item, qty: item.qty || 1 });
+    cart.push(normalized);
   }
   write(cart);
 }

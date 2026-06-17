@@ -48,6 +48,15 @@ export function AuthProvider({ children }) {
               .then(() => {
                 localStorage.removeItem("pendingProfile");
               });
+            if (payload.address || payload.pincode) {
+              supabase.auth.updateUser({
+                data: {
+                  full_name: payload.full_name || undefined,
+                  address: payload.address || undefined,
+                  pincode: payload.pincode || undefined,
+                },
+              }).catch(() => {});
+            }
           } catch {}
         }
         try { localStorage.removeItem("kolhapuri_cart"); } catch {}
@@ -95,6 +104,15 @@ export function AuthProvider({ children }) {
               .then(() => {
                 localStorage.removeItem("pendingProfile");
               });
+            if (payload.address || payload.pincode) {
+              supabase.auth.updateUser({
+                data: {
+                  full_name: payload.full_name || undefined,
+                  address: payload.address || undefined,
+                  pincode: payload.pincode || undefined,
+                },
+              }).catch(() => {});
+            }
           } catch {}
         }
         try { localStorage.removeItem("kolhapuri_cart"); } catch {}
@@ -130,18 +148,21 @@ export function AuthProvider({ children }) {
   }, []);
 
   const logout = async () => {
-    await supabase.auth.signOut();
+    // Clear local state immediately so the UI responds at once
+    setUser(null);
     try { localStorage.removeItem("guestUser"); } catch {}
     try { localStorage.removeItem("current_user_id"); } catch {}
     try {
-      const keys = Object.keys(localStorage);
-      keys.forEach((k) => {
+      Object.keys(localStorage).forEach((k) => {
         if (k.startsWith("kolhapuri_cart")) localStorage.removeItem(k);
       });
     } catch {}
     try { localStorage.removeItem("lastOrder"); } catch {}
     try { localStorage.removeItem("checkoutAsGuest"); } catch {}
-    setUser(null);
+    // Sign out from Supabase — this clears the auth token from localStorage
+    await supabase.auth.signOut();
+    // Hard redirect after token is cleared so the next page load starts fresh
+    window.location.href = "/";
   };
 
   const loginGuest = async ({ name, mobile, email }) => {

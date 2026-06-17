@@ -1,5 +1,25 @@
 const products = [
   {
+    id: 8,
+    slug: "jaggery-tea-masala",
+    name: "Special Jaggery Tea Masala",
+    price: 149,
+    rating: 4.8,
+    weight: "250g",
+    category: "premium",
+    description: "Authentic blend of jaggery & aromatic spices — ginger, cardamom, cinnamon, cloves. Boosts energy, aids digestion, and supports immunity. No chemicals, no preservatives.",
+    images: [
+      "/images/products/Tea-Masala-250g.png",
+      "/images/products/Tea-Masala-500g.png",
+      "/images/products/Tea-Masala-1kg.png",
+    ],
+    variants: [
+      { weight: "250g", price: 149, image: "/images/products/Tea-Masala-250g.png" },
+      { weight: "500g", price: 249, image: "/images/products/Tea-Masala-500g.png" },
+      { weight: "1kg",  price: 449, image: "/images/products/Tea-Masala-1kg.png"  },
+    ],
+  },
+  {
     id: 1,
     slug: "big-jaggery-block-free-powder",
     name: "Big Jaggery Block + Free Jaggery Powder",
